@@ -4,14 +4,25 @@ import { OfflineBanner } from '@/components/pwa/OfflineBanner'
 import { UpdateToast } from '@/components/pwa/UpdateToast'
 import { useAlerts } from '@/features/alerts/useAlerts'
 import { useStockRealtime } from '@/features/stock/useStockRealtime'
+import { useIsDesktop } from '@/hooks/useIsDesktop'
 
 import { BottomNav } from './BottomNav'
+import { DesktopShell } from './DesktopShell'
 
 /**
- * Coquille mobile-first : colonne pleine largeur sur téléphone, recentrée
- * sur grand écran (la déclinaison web dense viendra plus tard).
+ * Une seule application, deux habillages.
+ *
+ * Sur téléphone : colonne pleine largeur, barre basse, bouton scan au pouce.
+ * Sur ordinateur : barre latérale et contenu dense. Mêmes routes, mêmes
+ * données, mêmes hooks — rien ne peut diverger entre les deux.
  */
 export function AppShell() {
+  const isDesktop = useIsDesktop()
+  if (isDesktop) return <DesktopShell />
+  return <MobileShell />
+}
+
+function MobileShell() {
   const { groups } = useAlerts()
   useStockRealtime()
 

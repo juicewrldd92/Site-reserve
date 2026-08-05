@@ -154,7 +154,7 @@ export function Stock() {
       )}
 
       {mode === 'grid' ? (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
           {visible.map((item) => (
             <StockTile
               key={item.id}

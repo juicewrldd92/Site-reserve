@@ -8,7 +8,7 @@ import { PublicOnly, RequireEstablishment, RequireOnboarding } from '@/features/
 import { TenancyProvider } from '@/features/tenancy/TenancyProvider'
 import { queryClient } from '@/lib/queryClient'
 import { Alerts } from '@/routes/Alerts'
-import { Home } from '@/routes/Home'
+import { Overview } from '@/routes/Overview'
 import { Login } from '@/routes/Login'
 import { ManualProduct } from '@/routes/ManualProduct'
 import { Onboarding } from '@/routes/Onboarding'
@@ -68,7 +68,7 @@ export function App() {
                 <Route path="/produit/nouveau" element={<ManualProduct />} />
 
                 <Route element={<AppShell />}>
-                  <Route index element={<Home />} />
+                  <Route index element={<Overview />} />
                   <Route path="/stock" element={<Stock />} />
                   <Route path="/alertes" element={<Alerts />} />
                   <Route path="/commandes" element={<Orders />} />
