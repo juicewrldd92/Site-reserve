@@ -21,11 +21,23 @@ export function daysUntil(isoDate: string, today = new Date()): number {
   return Math.round((target.getTime() - start.getTime()) / 86_400_000)
 }
 
+/** Le délai réglé sur le produit prime ; sinon celui de l'établissement. */
+export function effectiveAlertDays(
+  item: Pick<StockOverviewRow, 'alert_lead_days'>,
+  establishmentDays: number,
+): number {
+  return item.alert_lead_days ?? establishmentDays
+}
+
 export function stockStatus(
-  item: Pick<StockOverviewRow, 'quantity' | 'min_threshold' | 'next_expiry'>,
-  alertDays: number,
+  item: Pick<
+    StockOverviewRow,
+    'quantity' | 'min_threshold' | 'next_expiry' | 'alert_lead_days'
+  >,
+  establishmentDays: number,
   today = new Date(),
 ): StockStatus {
+  const alertDays = effectiveAlertDays(item, establishmentDays)
   const days = item.next_expiry ? daysUntil(item.next_expiry, today) : null
 
   if (days !== null && days < 0) return 'expired'
@@ -36,11 +48,14 @@ export function stockStatus(
 }
 
 export function stockBadge(
-  item: Pick<StockOverviewRow, 'quantity' | 'min_threshold' | 'next_expiry'>,
-  alertDays: number,
+  item: Pick<
+    StockOverviewRow,
+    'quantity' | 'min_threshold' | 'next_expiry' | 'alert_lead_days'
+  >,
+  establishmentDays: number,
   today = new Date(),
 ): StockBadge {
-  const status = stockStatus(item, alertDays, today)
+  const status = stockStatus(item, establishmentDays, today)
   const days = item.next_expiry ? daysUntil(item.next_expiry, today) : null
 
   switch (status) {
@@ -59,6 +74,14 @@ export function stockBadge(
     case 'ok':
       return { tone: 'ok', label: 'En stock' }
   }
+}
+
+/** Quantité à commander pour revenir au stock optimal. */
+export function suggestedOrderQuantity(
+  item: Pick<StockOverviewRow, 'quantity' | 'min_threshold' | 'target_quantity'>,
+): number {
+  const target = item.target_quantity ?? (item.min_threshold ?? 0) * 2
+  return Math.max(0, Math.ceil(target - item.quantity))
 }
 
 /** « Périmée depuis hier », « Demain », « Dans 3 jours ». */

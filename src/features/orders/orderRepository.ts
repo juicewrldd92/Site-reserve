@@ -80,10 +80,34 @@ export async function removeOrderList(id: string): Promise<void> {
   if (error) throw new Error(error.message)
 }
 
-export async function markAsSent(id: string): Promise<void> {
+/** Marquée comme passée au fournisseur. */
+export async function markAsOrdered(id: string): Promise<void> {
+  const now = new Date().toISOString()
   const { error } = await getSupabase()
     .from('order_lists')
-    .update({ status: 'sent', sent_at: new Date().toISOString() })
+    .update({ status: 'ordered', ordered_at: now, sent_at: now })
+    .eq('id', id)
+  if (error) throw new Error(error.message)
+}
+
+/**
+ * Réception : les lignes cochées remontent dans le stock, en une transaction
+ * côté base. C'est ce qui referme la boucle stock → commande → stock.
+ *
+ * @returns le nombre de lignes rentrées en stock.
+ */
+export async function receiveOrderList(id: string): Promise<number> {
+  const { data, error } = await getSupabase().rpc('receive_order_list', {
+    p_order_list_id: id,
+  })
+  if (error) throw new Error(error.message)
+  return data
+}
+
+export async function reopenOrderList(id: string): Promise<void> {
+  const { error } = await getSupabase()
+    .from('order_lists')
+    .update({ status: 'draft', ordered_at: null, received_at: null })
     .eq('id', id)
   if (error) throw new Error(error.message)
 }

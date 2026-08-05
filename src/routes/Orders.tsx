@@ -14,6 +14,21 @@ import {
   ordersQueryKey,
 } from '@/features/orders/orderRepository'
 import { useTenancy } from '@/features/tenancy/useTenancy'
+import type { OrderStatus } from '@/lib/database.types'
+
+const STATUS_LABELS: Record<OrderStatus, string> = {
+  draft: 'À commander',
+  sent: 'Commandée',
+  ordered: 'Commandée',
+  received: 'Reçue',
+}
+
+const STATUS_TONES: Record<OrderStatus, 'ok' | 'warn' | 'neutral'> = {
+  draft: 'neutral',
+  sent: 'warn',
+  ordered: 'warn',
+  received: 'ok',
+}
 
 /** Les listes à commander de l'établissement. */
 export function Orders() {
@@ -101,8 +116,8 @@ export function Orders() {
                   })}
                 </span>
               </span>
-              <StatusBadge tone={list.status === 'sent' ? 'ok' : 'neutral'} size="sm">
-                {list.status === 'sent' ? 'Envoyée' : 'Brouillon'}
+              <StatusBadge tone={STATUS_TONES[list.status]} size="sm">
+                {STATUS_LABELS[list.status]}
               </StatusBadge>
               <ChevronRightIcon size={18} className="text-ink-faint flex-none" />
             </Link>

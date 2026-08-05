@@ -5,12 +5,15 @@ import { CalendarIcon, MinusIcon, PlusIcon } from '@/components/icons'
 import { BottomSheet } from '@/components/ui/BottomSheet'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { Select } from '@/components/ui/Select'
 import { cn } from '@/components/ui/cn'
+import { UnitSelect } from '@/features/products/UnitSelect'
 import { unitLabel } from '@/features/products/units'
 import { useTenancy } from '@/features/tenancy/useTenancy'
 import type { StockOverviewRow } from '@/lib/database.types'
 
-import { expiryPhrase, formatDate } from './status'
+import { ExpiryAlertSelect } from './ExpiryAlertSelect'
+import { expiryPhrase, formatDate, suggestedOrderQuantity } from './status'
 import {
   addBatch,
   listBatches,
@@ -34,7 +37,10 @@ export function StockDetailSheet({
   const { current } = useTenancy()
 
   const [quantity, setQuantity] = useState(item.quantity)
+  const [unit, setUnit] = useState(item.unit)
   const [threshold, setThreshold] = useState(item.min_threshold?.toString() ?? '')
+  const [target, setTarget] = useState(item.target_quantity?.toString() ?? '')
+  const [leadDays, setLeadDays] = useState<number | null>(item.alert_lead_days)
   const [location, setLocation] = useState(item.location)
   const [newBatchDate, setNewBatchDate] = useState('')
   const [newBatchQty, setNewBatchQty] = useState('1')
@@ -45,6 +51,12 @@ export function StockDetailSheet({
     enabled: open,
   })
 
+  const shortfall = suggestedOrderQuantity({
+    quantity,
+    min_threshold: threshold.trim() === '' ? null : Number(threshold),
+    target_quantity: target.trim() === '' ? null : Number(target),
+  })
+
   const refresh = async () => {
     await queryClient.invalidateQueries({ queryKey: stockQueryKey })
   }
@@ -53,7 +65,10 @@ export function StockDetailSheet({
     mutationFn: () =>
       updateStockItem(item.id, {
         quantity,
+        unit,
         min_threshold: threshold.trim() === '' ? null : Number(threshold),
+        target_quantity: target.trim() === '' ? null : Number(target),
+        alert_lead_days: leadDays,
         location,
       }),
     onSuccess: async () => {
@@ -117,7 +132,7 @@ export function StockDetailSheet({
                 className="w-20 border-0 bg-transparent text-[19px] font-bold outline-none"
               />
               <span className="text-ink-muted text-[14px] font-semibold">
-                {unitLabel(item.unit, quantity)}
+                {unitLabel(unit, quantity)}
               </span>
             </div>
           </div>
@@ -141,9 +156,11 @@ export function StockDetailSheet({
           </div>
         </Card>
 
+        <UnitSelect value={unit} onChange={setUnit} />
+
         <div className="grid grid-cols-2 gap-3">
           <Card className="flex flex-col gap-1.5 px-4 py-3.5">
-            <span className="text-ink-muted text-[12.5px] font-semibold">Alerte sous</span>
+            <span className="text-ink-muted text-[12.5px] font-semibold">Stock mini</span>
             <input
               type="number"
               inputMode="decimal"
@@ -155,21 +172,39 @@ export function StockDetailSheet({
             />
           </Card>
           <Card className="flex flex-col gap-1.5 px-4 py-3.5">
-            <span className="text-ink-muted text-[12.5px] font-semibold">Emplacement</span>
-            <select
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              className="text-ink w-full border-0 bg-transparent text-[15.5px] font-bold outline-none"
-            >
-              <option value="">Sans emplacement</option>
-              {(current?.locations ?? []).map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
+            <span className="text-ink-muted text-[12.5px] font-semibold">Stock optimal</span>
+            <input
+              type="number"
+              inputMode="decimal"
+              min={0}
+              placeholder="—"
+              value={target}
+              onChange={(e) => setTarget(e.target.value)}
+              className="placeholder:text-ink-faint w-full border-0 bg-transparent text-[15.5px] font-bold outline-none"
+            />
           </Card>
         </div>
+
+        {shortfall > 0 && (
+          <p className="bg-warn-bg text-warn-ink rounded-card px-4 py-2.5 text-[13px] font-semibold">
+            Il manque {shortfall} {unitLabel(unit, shortfall)} pour atteindre l'optimal.
+          </p>
+        )}
+
+        <Select
+          label="Emplacement"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+        >
+          <option value="">Sans emplacement</option>
+          {(current?.locations ?? []).map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </Select>
+
+        <ExpiryAlertSelect value={leadDays} onChange={setLeadDays} />
 
         <section className="flex flex-col gap-2">
           <span className="text-[15px] font-bold">Lots & dates</span>

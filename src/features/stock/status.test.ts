@@ -8,7 +8,13 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { daysUntil, expiryPhrase, stockBadge, stockStatus } from './status.ts'
+import {
+  daysUntil,
+  expiryPhrase,
+  stockBadge,
+  stockStatus,
+  suggestedOrderQuantity,
+} from './status.ts'
 
 const TODAY = new Date(2026, 7, 4) // 4 août 2026
 
@@ -20,8 +26,13 @@ function iso(offsetDays: number): string {
   return `${d.getFullYear()}-${month}-${day}`
 }
 
-function item(quantity: number, min_threshold: number | null, next_expiry: string | null) {
-  return { quantity, min_threshold, next_expiry }
+function item(
+  quantity: number,
+  min_threshold: number | null,
+  next_expiry: string | null,
+  alert_lead_days: number | null = null,
+) {
+  return { quantity, min_threshold, next_expiry, alert_lead_days }
 }
 
 test('daysUntil compte en jours calendaires', () => {
@@ -88,4 +99,36 @@ test('les phrases de DLC parlent français', () => {
   assert.equal(expiryPhrase(iso(0), TODAY), "Périme aujourd'hui")
   assert.equal(expiryPhrase(iso(1), TODAY), 'Demain')
   assert.equal(expiryPhrase(iso(4), TODAY), 'Dans 4 jours')
+})
+
+test('le délai réglé sur le produit prime sur celui de l’établissement', () => {
+  // L'établissement prévient à 5 jours, ce produit à 1 seul.
+  assert.equal(stockStatus(item(5, null, iso(3), 1), 5, TODAY), 'ok')
+  // À l'inverse, un produit surveillé de loin alerte plus tôt.
+  assert.equal(stockStatus(item(5, null, iso(20), 30), 5, TODAY), 'expiring')
+  // Sans réglage produit, on suit l'établissement.
+  assert.equal(stockStatus(item(5, null, iso(3), null), 5, TODAY), 'expiring')
+})
+
+test('la quantité suggérée vise le stock optimal', () => {
+  // Le cas du cahier des charges : stock 3, optimal 12 → commander 9.
+  assert.equal(
+    suggestedOrderQuantity({ quantity: 3, min_threshold: 5, target_quantity: 12 }),
+    9,
+  )
+  // Déjà au niveau : rien à commander.
+  assert.equal(
+    suggestedOrderQuantity({ quantity: 12, min_threshold: 5, target_quantity: 12 }),
+    0,
+  )
+  // Les fractions sont arrondies au-dessus : on ne commande pas 8,4 sacs.
+  assert.equal(
+    suggestedOrderQuantity({ quantity: 3.6, min_threshold: 5, target_quantity: 12 }),
+    9,
+  )
+  // Sans optimal, on retombe sur le double du seuil (comportement historique).
+  assert.equal(
+    suggestedOrderQuantity({ quantity: 2, min_threshold: 5, target_quantity: null }),
+    8,
+  )
 })

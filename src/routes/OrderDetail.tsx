@@ -10,10 +10,12 @@ import {
   fillFromLowStock,
   getOrderList,
   listOrderItems,
-  markAsSent,
+  markAsOrdered,
   ordersQueryKey,
+  receiveOrderList,
   removeOrderItem,
   removeOrderList,
+  reopenOrderList,
   updateOrderItem,
 } from '@/features/orders/orderRepository'
 import {
@@ -23,6 +25,7 @@ import {
   whatsappUrl,
 } from '@/features/orders/share'
 import { unitLabel } from '@/features/products/units'
+import { stockQueryKey } from '@/features/stock/stockRepository'
 import { useTenancy } from '@/features/tenancy/useTenancy'
 
 /** Détail d'une liste : cases à cocher, quantités, partage. */
@@ -71,7 +74,25 @@ export function OrderDetail() {
   })
 
   const send = useMutation({
-    mutationFn: () => markAsSent(id),
+    mutationFn: () => markAsOrdered(id),
+    onSuccess: refresh,
+  })
+
+  const receive = useMutation({
+    mutationFn: () => receiveOrderList(id),
+    onSuccess: async (count) => {
+      setNotice(
+        count === 0
+          ? 'Aucune ligne cochée : rien n’est rentré en stock.'
+          : `${count} produit${count > 1 ? 's rentrés' : ' rentré'} en stock.`,
+      )
+      await queryClient.invalidateQueries({ queryKey: stockQueryKey })
+      await refresh()
+    },
+  })
+
+  const reopen = useMutation({
+    mutationFn: () => reopenOrderList(id),
     onSuccess: refresh,
   })
 
@@ -85,6 +106,27 @@ export function OrderDetail() {
 
   const rows = items.data ?? []
   const checked = rows.filter((item) => item.is_checked)
+  const status = list.data?.status ?? 'draft'
+  const isReceived = status === 'received'
+  const isOrdered = status === 'ordered' || status === 'sent'
+
+  // Regroupement par fournisseur : on ne mélange pas la commande du primeur
+  // avec celle de Metro.
+  const grouped = Object.values(
+    rows.reduce<Record<string, { key: string; label: string; items: typeof rows }>>(
+      (acc, item) => {
+        const key = item.supplier_id ?? 'sans'
+        acc[key] ??= {
+          key,
+          label: item.supplier_name ?? 'Sans fournisseur',
+          items: [],
+        }
+        acc[key].items.push(item)
+        return acc
+      },
+      {},
+    ),
+  ).sort((a, b) => a.label.localeCompare(b.label, 'fr'))
   const text = formatOrderText(
     list.data?.name ?? 'Commande',
     current?.name ?? '',
@@ -116,10 +158,16 @@ export function OrderDetail() {
         </span>
       </header>
 
+      <div className="flex gap-2">
+        <StatusStep label="À commander" done={true} current={!isOrdered && !isReceived} />
+        <StatusStep label="Commandée" done={isOrdered || isReceived} current={isOrdered} />
+        <StatusStep label="Reçue" done={isReceived} current={isReceived} />
+      </div>
+
       <Button
         variant="tertiary"
         size="md"
-        disabled={generate.isPending}
+        disabled={generate.isPending || isReceived}
         onClick={() => generate.mutate()}
       >
         <UploadIcon size={18} strokeWidth={2} className="text-corail" />
@@ -134,8 +182,14 @@ export function OrderDetail() {
         </p>
       )}
 
-      <div className="flex flex-col gap-2.5">
-        {rows.map((item) => (
+      {grouped.map((group) => (
+        <div key={group.key} className="flex flex-col gap-2.5">
+          {grouped.length > 1 && (
+            <span className="text-ink-muted px-1 text-[13px] font-bold">
+              {group.label} · {group.items.length}
+            </span>
+          )}
+          {group.items.map((item) => (
           <Card
             key={item.id}
             className={cn('flex items-center gap-3 p-3', !item.is_checked && 'opacity-60')}
@@ -193,8 +247,9 @@ export function OrderDetail() {
               </button>
             </span>
           </Card>
-        ))}
-      </div>
+          ))}
+        </div>
+      ))}
 
       {rows.length === 0 && items.isSuccess && (
         <p className="text-ink-muted py-8 text-center text-[14.5px]">
@@ -228,17 +283,50 @@ export function OrderDetail() {
             </button>
           </div>
 
-          <Button
-            onClick={() => {
-              void onShare()
-              send.mutate()
-            }}
-            disabled={send.isPending}
-          >
-            {list.data?.status === 'sent'
-              ? 'Repartager la liste'
-              : `Partager la liste · ${checked.length} item${checked.length > 1 ? 's' : ''}`}
-          </Button>
+          {!isOrdered && !isReceived && (
+            <Button
+              onClick={() => {
+                void onShare()
+                send.mutate()
+              }}
+              disabled={send.isPending || checked.length === 0}
+            >
+              {send.isPending
+                ? 'On envoie…'
+                : `Envoyer la commande · ${checked.length} item${checked.length > 1 ? 's' : ''}`}
+            </Button>
+          )}
+
+          {isOrdered && (
+            <Button onClick={() => receive.mutate()} disabled={receive.isPending}>
+              {receive.isPending ? 'On range…' : 'Marquer comme reçue'}
+            </Button>
+          )}
+
+          {isReceived && (
+            <p className="bg-ok-bg text-ok-ink rounded-card px-4 py-3 text-center text-[13.5px] font-semibold">
+              Commande reçue le{' '}
+              {new Date(list.data?.received_at ?? Date.now()).toLocaleDateString('fr-FR')} —
+              le stock a été mis à jour.
+            </p>
+          )}
+
+          {(isOrdered || isReceived) && (
+            <button
+              type="button"
+              onClick={() => reopen.mutate()}
+              disabled={reopen.isPending}
+              className="text-ink-muted py-1 text-[13px] font-semibold"
+            >
+              Rouvrir en brouillon
+            </button>
+          )}
+
+          {receive.isError && (
+            <p className="bg-alert-bg text-alert-ink rounded-card px-4 py-3 text-[13.5px] font-semibold">
+              {receive.error.message}
+            </p>
+          )}
         </>
       )}
 
@@ -251,5 +339,31 @@ export function OrderDetail() {
         Supprimer cette liste
       </button>
     </div>
+  )
+}
+
+/** Fil d'Ariane du cycle de vie : on voit d'un coup d'œil où en est la commande. */
+function StatusStep({
+  label,
+  done,
+  current,
+}: {
+  label: string
+  done: boolean
+  current: boolean
+}) {
+  return (
+    <span
+      className={cn(
+        'flex-1 rounded-full py-2 text-center text-[12.5px] font-bold',
+        current
+          ? 'bg-corail text-white'
+          : done
+            ? 'bg-ok-bg text-ok-ink'
+            : 'bg-chip text-ink-faint',
+      )}
+    >
+      {label}
+    </span>
   )
 }

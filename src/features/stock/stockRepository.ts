@@ -51,6 +51,8 @@ export type AddToStockInput = {
   unit: ProductUnit
   location?: string
   minThreshold?: number | null
+  targetQuantity?: number | null
+  alertLeadDays?: number | null
   expiryDate?: string | null
 }
 
@@ -63,6 +65,8 @@ export async function addToStock(input: AddToStockInput): Promise<string> {
     p_unit: input.unit,
     p_location: input.location ?? '',
     p_min_threshold: input.minThreshold ?? null,
+    p_target_quantity: input.targetQuantity ?? null,
+    p_alert_lead_days: input.alertLeadDays ?? null,
     p_expiry_date: input.expiryDate ?? null,
   })
   if (error) throw new Error(error.message)
@@ -91,7 +95,14 @@ export async function setQuantity(
 
 export async function updateStockItem(
   stockItemId: string,
-  patch: { quantity?: number; min_threshold?: number | null; location?: string; unit?: ProductUnit },
+  patch: {
+    quantity?: number
+    min_threshold?: number | null
+    target_quantity?: number | null
+    alert_lead_days?: number | null
+    location?: string
+    unit?: ProductUnit
+  },
 ): Promise<void> {
   const supabase = getSupabase()
   const { data: auth } = await supabase.auth.getUser()

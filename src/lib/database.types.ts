@@ -57,7 +57,8 @@ export type InvitationRow = {
   accepted_at: string | null
 }
 
-export type OrderStatus = 'draft' | 'sent'
+/** `sent` est conservé pour les listes créées avant le cycle de vie complet. */
+export type OrderStatus = 'draft' | 'sent' | 'ordered' | 'received'
 
 export type SupplierRow = {
   id: string
@@ -76,6 +77,8 @@ export type OrderListRow = {
   created_by: string | null
   created_at: string
   sent_at: string | null
+  ordered_at: string | null
+  received_at: string | null
 }
 
 export type OrderListItemRow = {
@@ -86,6 +89,8 @@ export type OrderListItemRow = {
   unit: ProductUnit
   note: string | null
   is_checked: boolean
+  received_quantity: number | null
+  supplier_id: string | null
   created_at: string
 }
 
@@ -94,6 +99,7 @@ export type OrderListItemView = OrderListItemRow & {
   name: string
   brand: string | null
   image_url: string | null
+  supplier_name: string | null
 }
 
 export type ProductUnit =
@@ -119,7 +125,12 @@ export type StockItemRow = {
   product_id: string
   quantity: number
   unit: ProductUnit
+  /** Sous ce seuil, alerte « stock bas ». */
   min_threshold: number | null
+  /** Niveau visé au réapprovisionnement — sert à calculer la quantité à commander. */
+  target_quantity: number | null
+  /** Délai d'alerte DLC propre au produit ; `null` = réglage de l'établissement. */
+  alert_lead_days: number | null
   location: string
   updated_at: string
   updated_by: string | null
@@ -143,6 +154,8 @@ export type StockOverviewRow = StockItemRow & {
   category: string | null
   barcode: string | null
   source: ProductSource
+  supplier_id: string | null
+  supplier_name: string | null
   /** DLC la plus proche parmi les lots, `null` si aucun lot daté. */
   next_expiry: string | null
   batch_count: number
@@ -158,6 +171,7 @@ export type ProductRow = {
   category: string | null
   default_unit: ProductUnit
   source: ProductSource
+  supplier_id: string | null
   /** Réservé au food cost (hors MVP) — ne pas exposer dans l'UI. */
   unit_cost: number | null
   created_by: string | null
@@ -298,8 +312,14 @@ export type Database = {
           p_location?: string
           p_min_threshold?: number | null
           p_expiry_date?: string | null
+          p_target_quantity?: number | null
+          p_alert_lead_days?: number | null
         }
         Returns: string
+      }
+      receive_order_list: {
+        Args: { p_order_list_id: string }
+        Returns: number
       }
     }
     Enums: {

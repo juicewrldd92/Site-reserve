@@ -6,7 +6,9 @@ import { BottomSheet } from '@/components/ui/BottomSheet'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { cn } from '@/components/ui/cn'
+import { UnitSelect } from '@/features/products/UnitSelect'
 import { unitLabel } from '@/features/products/units'
+import { ExpiryAlertSelect } from '@/features/stock/ExpiryAlertSelect'
 import { useTenancy } from '@/features/tenancy/useTenancy'
 import type { ProductRow, ProductUnit } from '@/lib/database.types'
 
@@ -36,10 +38,12 @@ export function AddToStockSheet({
   const { current } = useTenancy()
 
   const [quantity, setQuantity] = useState(1)
-  const [unit] = useState<ProductUnit>(product.default_unit)
+  const [unit, setUnit] = useState<ProductUnit>(product.default_unit)
   const [location, setLocation] = useState(defaultLocation ?? current?.locations[0] ?? '')
   const [expiry, setExpiry] = useState('')
   const [threshold, setThreshold] = useState('')
+  const [target, setTarget] = useState('')
+  const [leadDays, setLeadDays] = useState<number | null>(null)
 
   const add = useMutation({
     mutationFn: async () => {
@@ -51,6 +55,8 @@ export function AddToStockSheet({
         unit,
         location,
         minThreshold: threshold.trim() === '' ? null : Number(threshold),
+        targetQuantity: target.trim() === '' ? null : Number(target),
+        alertLeadDays: leadDays,
         expiryDate: expiry === '' ? null : expiry,
       })
     },
@@ -110,21 +116,11 @@ export function AddToStockSheet({
           </div>
         </Card>
 
+        <UnitSelect value={unit} onChange={setUnit} />
+
         <div className="grid grid-cols-2 gap-3">
           <Card className="flex flex-col gap-1.5 px-4 py-3.5">
-            <span className="text-ink-muted text-[12.5px] font-semibold">Date limite</span>
-            <label className="flex items-center gap-2">
-              <CalendarIcon size={17} className="text-corail flex-none" />
-              <input
-                type="date"
-                value={expiry}
-                onChange={(e) => setExpiry(e.target.value)}
-                className="text-ink w-full border-0 bg-transparent text-[15px] font-bold outline-none"
-              />
-            </label>
-          </Card>
-          <Card className="flex flex-col gap-1.5 px-4 py-3.5">
-            <span className="text-ink-muted text-[12.5px] font-semibold">Alerte sous</span>
+            <span className="text-ink-muted text-[12.5px] font-semibold">Stock mini</span>
             <input
               type="number"
               inputMode="decimal"
@@ -135,7 +131,43 @@ export function AddToStockSheet({
               className="placeholder:text-ink-faint w-full border-0 bg-transparent text-[15.5px] font-bold outline-none"
             />
           </Card>
+          <Card className="flex flex-col gap-1.5 px-4 py-3.5">
+            <span className="text-ink-muted text-[12.5px] font-semibold">Stock optimal</span>
+            <input
+              type="number"
+              inputMode="decimal"
+              min={0}
+              placeholder="—"
+              value={target}
+              onChange={(e) => setTarget(e.target.value)}
+              className="placeholder:text-ink-faint w-full border-0 bg-transparent text-[15.5px] font-bold outline-none"
+            />
+          </Card>
         </div>
+
+        {threshold.trim() !== '' && target.trim() !== '' && (
+          <p className="text-ink-muted px-1 text-[12.5px]">
+            Sous {threshold} {unitLabel(unit, Number(threshold))}, on te proposera de
+            recommander jusqu'à {target}.
+          </p>
+        )}
+
+        <Card className="flex flex-col gap-1.5 px-4 py-3.5">
+          <span className="text-ink-muted text-[12.5px] font-semibold">Date limite</span>
+          <label className="flex items-center gap-2">
+            <CalendarIcon size={17} className="text-corail flex-none" />
+            <input
+              type="date"
+              value={expiry}
+              onChange={(e) => setExpiry(e.target.value)}
+              className="text-ink w-full border-0 bg-transparent text-[15px] font-bold outline-none"
+            />
+          </label>
+        </Card>
+
+        {expiry !== '' && (
+          <ExpiryAlertSelect value={leadDays} onChange={setLeadDays} />
+        )}
 
         {current && current.locations.length > 0 && (
           <Card className="flex flex-col gap-2.5 px-4 py-3.5">
