@@ -63,8 +63,16 @@ export function OrderDetail() {
   })
 
   const patch = useMutation({
-    mutationFn: (input: { itemId: string; quantity?: number; is_checked?: boolean }) =>
-      updateOrderItem(input.itemId, input),
+    // `itemId` identifie la ligne, il ne fait pas partie du patch : on le sort
+    // avant l'envoi, sinon PostgREST le prend pour une colonne.
+    mutationFn: ({
+      itemId,
+      ...changes
+    }: {
+      itemId: string
+      quantity?: number
+      is_checked?: boolean
+    }) => updateOrderItem(itemId, changes),
     onSuccess: refresh,
   })
 

@@ -1,4 +1,8 @@
-import type { OrderListItemView, OrderListRow } from '@/lib/database.types'
+import type {
+  OrderListItemRow,
+  OrderListItemView,
+  OrderListRow,
+} from '@/lib/database.types'
 import { getSupabase } from '@/lib/supabase'
 
 export const ordersQueryKey = ['orders'] as const
@@ -62,11 +66,37 @@ export async function fillFromLowStock(orderListId: string): Promise<number> {
   return data
 }
 
+/**
+ * Mise à jour d'une ligne de commande.
+ *
+ * On recopie explicitement les colonnes autorisées au lieu d'étaler l'objet
+ * reçu : un champ parasite (un identifiant, un état d'interface) partirait
+ * sinon vers PostgREST, qui le refuserait comme colonne inconnue.
+ */
 export async function updateOrderItem(
   itemId: string,
-  patch: { quantity?: number; is_checked?: boolean; note?: string | null },
+  patch: {
+    quantity?: number
+    is_checked?: boolean
+    note?: string | null
+    received_quantity?: number | null
+  },
 ): Promise<void> {
-  const { error } = await getSupabase().from('order_list_items').update(patch).eq('id', itemId)
+  const changes: Partial<
+    Pick<OrderListItemRow, 'quantity' | 'is_checked' | 'note' | 'received_quantity'>
+  > = {}
+  if (patch.quantity !== undefined) changes.quantity = patch.quantity
+  if (patch.is_checked !== undefined) changes.is_checked = patch.is_checked
+  if (patch.note !== undefined) changes.note = patch.note
+  if (patch.received_quantity !== undefined) {
+    changes.received_quantity = patch.received_quantity
+  }
+  if (Object.keys(changes).length === 0) return
+
+  const { error } = await getSupabase()
+    .from('order_list_items')
+    .update(changes)
+    .eq('id', itemId)
   if (error) throw new Error(error.message)
 }
 
