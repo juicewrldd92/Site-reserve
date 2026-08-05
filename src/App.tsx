@@ -23,6 +23,12 @@ import { Welcome } from '@/routes/Welcome'
 // pour que l'app démarre vite sur un téléphone de cuisine.
 const Scan = lazy(() => import('@/routes/Scan').then((m) => ({ default: m.Scan })))
 
+// La vitrine n'a rien à faire dans le bundle de l'app : elle est publique et
+// ne sert qu'une fois, avant l'inscription.
+const Landing = lazy(() =>
+  import('@/routes/Landing').then((m) => ({ default: m.Landing })),
+)
+
 export function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -30,6 +36,14 @@ export function App() {
         <AuthProvider>
           <TenancyProvider>
             <Routes>
+              <Route
+                path="/presentation"
+                element={
+                  <Suspense fallback={<Splash />}>
+                    <Landing />
+                  </Suspense>
+                }
+              />
               <Route
                 path="/bienvenue"
                 element={

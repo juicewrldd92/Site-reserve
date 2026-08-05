@@ -25,12 +25,26 @@
     U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
+/* Fraunces — serif d'affichage, réservé à la page de présentation. L'app,
+   elle, reste entièrement en Plus Jakarta Sans. */
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 500 700;
+  font-display: swap;
+  src: url('/fonts/fraunces-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 /* ---------------------------------------------------------------------------
    Design tokens — repris 1:1 du mini design system « Réserve ».
    Vert / ambre / rouge servent UNIQUEMENT aux statuts, jamais en décor.
 --------------------------------------------------------------------------- */
 @theme {
   --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
   --font-mono: ui-monospace, Menlo, monospace;
 
   /* Accent */
@@ -41,6 +55,10 @@
 
   /* Surfaces */
   --color-canvas: #faf8f5;
+  /* Nuance légèrement plus chaude, pour alterner les sections de la vitrine. */
+  --color-canvas-warm: #f5f1e6;
+  /* Le fond sombre du scanner, réemployé pour le héros de la vitrine. */
+  --color-night: #171310;
   --color-surface: #ffffff;
   --color-chip: #f4f0ea;
 
