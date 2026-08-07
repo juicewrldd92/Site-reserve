@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { CloseIcon } from '@/components/icons'
 import { Card } from '@/components/ui/Card'
 import { cn } from '@/components/ui/cn'
+import { ProfileSection } from '@/features/profile/ProfileSection'
 import { LocationsEditor } from '@/features/tenancy/LocationsEditor'
 import { Members } from '@/features/tenancy/Members'
 import { tenancyQueryKey } from '@/features/tenancy/tenancyContext'
@@ -59,6 +60,8 @@ export function Settings() {
           </span>
         </div>
       </Card>
+
+      <ProfileSection />
 
       <section className="flex flex-col gap-2.5">
         <h2 className="text-[16px] font-bold">Alertes</h2>

@@ -11,6 +11,7 @@ import { BottomSheet } from '@/components/ui/BottomSheet'
 import { Card } from '@/components/ui/Card'
 import { cn } from '@/components/ui/cn'
 import { useAuth } from '@/features/auth/useAuth'
+import { useProfile } from '@/features/profile/useProfile'
 import { useInstallPrompt } from '@/hooks/useInstallPrompt'
 
 import { useTenancy } from './useTenancy'
@@ -22,6 +23,7 @@ export function EstablishmentSwitcher() {
   const [open, setOpen] = useState(false)
   const { current, establishments, organizations, memberships, setCurrentId } = useTenancy()
   const { user, signOut } = useAuth()
+  const { displayName, avatarUrl } = useProfile()
   const { canInstall, install } = useInstallPrompt()
 
   return (
@@ -103,11 +105,18 @@ export function EstablishmentSwitcher() {
           )}
 
           <Card className="mt-2 flex items-center gap-3 p-3.5">
-            <span className="bg-corail-tint text-corail-ink flex h-10 w-10 flex-none items-center justify-center rounded-full text-[15px] font-bold">
-              {(user?.email ?? '?').slice(0, 1).toUpperCase()}
+            <span className="flex h-10 w-10 flex-none items-center justify-center overflow-hidden rounded-full">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <span className="bg-corail-tint text-corail-ink flex h-full w-full items-center justify-center text-[15px] font-bold">
+                  {displayName.slice(0, 1).toUpperCase()}
+                </span>
+              )}
             </span>
-            <span className="text-ink-muted min-w-0 flex-1 truncate text-[13px]">
-              {user?.email}
+            <span className="flex min-w-0 flex-1 flex-col">
+              <span className="truncate text-[14px] font-bold">{displayName}</span>
+              <span className="text-ink-muted truncate text-[12px]">{user?.email}</span>
             </span>
             <button
               type="button"

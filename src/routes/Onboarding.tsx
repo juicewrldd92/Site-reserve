@@ -7,8 +7,15 @@ import { Button } from '@/components/ui/Button'
 import { Chip } from '@/components/ui/Chip'
 import { Field, FieldGroup } from '@/components/ui/Field'
 import { cn } from '@/components/ui/cn'
+import { IdentityFields } from '@/features/profile/IdentityFields'
+import {
+  profileQueryKey,
+  updateProfile,
+  uploadAvatar,
+} from '@/features/profile/profileRepository'
 import { tenancyQueryKey } from '@/features/tenancy/tenancyContext'
 import { useTenancy } from '@/features/tenancy/useTenancy'
+import { useAuth } from '@/features/auth/useAuth'
 import { getSupabase } from '@/lib/supabase'
 
 const CUISINES = ['Trattoria', 'Bistrot', 'Bar à vin', 'Pizzeria', 'Brasserie', 'Autre'] as const
@@ -27,6 +34,13 @@ export function Onboarding() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { setCurrentId } = useTenancy()
+  const { user } = useAuth()
+
+  // Deux étapes : qui tu es, puis où tu travailles. La seconde est la seule
+  // obligatoire — on n'empêche personne d'entrer parce qu'il n'a pas de photo.
+  const [step, setStep] = useState<1 | 2>(1)
+  const [displayName, setDisplayName] = useState('')
+  const [photo, setPhoto] = useState<File | null>(null)
 
   const [name, setName] = useState('')
   const [cuisine, setCuisine] = useState<string | null>(null)
@@ -36,6 +50,23 @@ export function Onboarding() {
 
   const create = useMutation({
     mutationFn: async () => {
+      // L'identité d'abord : si ça échoue, on n'a pas encore créé d'organisation
+      // orpheline. Un échec de photo ne doit pas bloquer l'inscription.
+      if (user?.id) {
+        let avatarUrl: string | null = null
+        if (photo) {
+          try {
+            avatarUrl = await uploadAvatar(user.id, photo)
+          } catch (cause) {
+            console.warn('Photo de profil non envoyée :', cause)
+          }
+        }
+        await updateProfile(user.id, {
+          full_name: displayName.trim() === '' ? null : displayName.trim(),
+          ...(avatarUrl ? { avatar_url: avatarUrl } : {}),
+        })
+      }
+
       const { data, error } = await getSupabase().rpc(
         'create_organization_with_establishment',
         {
@@ -53,6 +84,7 @@ export function Onboarding() {
     onSuccess: async (created) => {
       setCurrentId(created.establishment_id)
       await queryClient.invalidateQueries({ queryKey: tenancyQueryKey })
+      await queryClient.invalidateQueries({ queryKey: profileQueryKey })
       // Navigation explicite : le garde de `/onboarding` ne regarde que la
       // session, il ne nous sortirait pas d'ici tout seul.
       navigate('/', { replace: true })
@@ -69,6 +101,11 @@ export function Onboarding() {
 
   function onSubmit(event: FormEvent) {
     event.preventDefault()
+    // Entrée pressée à l'étape 1 : on avance, on ne crée rien.
+    if (step === 1) {
+      setStep(2)
+      return
+    }
     if (name.trim().length === 0 || create.isPending) return
     create.mutate()
   }
@@ -84,21 +121,44 @@ export function Onboarding() {
         }}
       >
         <div className="flex items-center justify-center gap-1.5 py-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#DCD5CC]" />
-          <span className="bg-corail h-1.5 w-[22px] rounded-full" />
-          <span className="h-1.5 w-1.5 rounded-full bg-[#DCD5CC]" />
+          <span
+            className={cn(
+              'h-1.5 rounded-full',
+              step === 1 ? 'bg-corail w-[22px]' : 'w-1.5 bg-[#DCD5CC]',
+            )}
+          />
+          <span
+            className={cn(
+              'h-1.5 rounded-full',
+              step === 2 ? 'bg-corail w-[22px]' : 'w-1.5 bg-[#DCD5CC]',
+            )}
+          />
         </div>
 
         <div className="flex flex-col gap-2 pt-5">
           <h1 className="text-[28px] leading-[1.15] font-extrabold tracking-[-0.03em]">
-            On parle de quel resto ?
+            {step === 1 ? 'On fait connaissance ?' : 'On parle de quel resto ?'}
           </h1>
           <p className="text-ink-muted text-[15.5px] leading-[1.5]">
-            Tu pourras en ajouter d'autres plus tard.
+            {step === 1
+              ? 'Juste de quoi te dire bonjour correctement.'
+              : "Tu pourras en ajouter d'autres plus tard."}
           </p>
         </div>
 
-        <div className="flex flex-col gap-4 pt-6">
+        {step === 1 && (
+          <div className="pt-7">
+            <IdentityFields
+              name={displayName}
+              onNameChange={setDisplayName}
+              photo={photo}
+              onPhotoChange={setPhoto}
+              size="lg"
+            />
+          </div>
+        )}
+
+        <div className={cn('flex flex-col gap-4 pt-6', step === 1 && 'hidden')}>
           <Field
             label="Nom de l'établissement"
             required
@@ -181,10 +241,25 @@ export function Onboarding() {
           </p>
         )}
 
-        <div className={cn('mt-auto flex flex-col gap-3 pt-8')}>
-          <Button type="submit" disabled={name.trim().length === 0 || create.isPending}>
-            {create.isPending ? 'On installe ta réserve…' : 'Continuer'}
-          </Button>
+        <div className="mt-auto flex flex-col gap-2 pt-8">
+          {step === 1 ? (
+            <Button type="button" onClick={() => setStep(2)}>
+              Continuer
+            </Button>
+          ) : (
+            <>
+              <Button type="submit" disabled={name.trim().length === 0 || create.isPending}>
+                {create.isPending ? 'On installe ta réserve…' : 'C’est parti'}
+              </Button>
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                className="text-ink-muted py-2 text-[14px] font-semibold"
+              >
+                Retour
+              </button>
+            </>
+          )}
         </div>
       </form>
     </div>

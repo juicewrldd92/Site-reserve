@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 
 import {
   BellIcon,
@@ -14,7 +14,7 @@ import { OfflineBanner } from '@/components/pwa/OfflineBanner'
 import { UpdateToast } from '@/components/pwa/UpdateToast'
 import { cn } from '@/components/ui/cn'
 import { useAlerts } from '@/features/alerts/useAlerts'
-import { useAuth } from '@/features/auth/useAuth'
+import { useProfile } from '@/features/profile/useProfile'
 import { EstablishmentSwitcher } from '@/features/tenancy/EstablishmentSwitcher'
 import { useStockRealtime } from '@/features/stock/useStockRealtime'
 
@@ -42,10 +42,9 @@ const NAV: readonly NavEntry[] = [
 export function DesktopShell() {
   const navigate = useNavigate()
   const { groups } = useAlerts()
-  const { user } = useAuth()
+  const { displayName, avatarUrl } = useProfile()
   useStockRealtime()
 
-  const initial = (user?.email ?? '?').slice(0, 1).toUpperCase()
 
   return (
     <div className="bg-canvas flex h-dvh overflow-hidden">
@@ -120,9 +119,20 @@ export function DesktopShell() {
             Ajouter un produit
           </button>
 
-          <span className="bg-corail-tint text-corail-ink flex h-[42px] w-[42px] items-center justify-center rounded-full text-[14.5px] font-bold">
-            {initial}
-          </span>
+          <Link
+            to="/reglages"
+            aria-label="Réglages"
+            title={displayName}
+            className="flex h-[42px] w-[42px] flex-none items-center justify-center overflow-hidden rounded-full"
+          >
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <span className="bg-corail-tint text-corail-ink flex h-full w-full items-center justify-center text-[14.5px] font-bold">
+                {displayName.slice(0, 1).toUpperCase()}
+              </span>
+            )}
+          </Link>
         </header>
 
         <main className="min-h-0 flex-1 overflow-y-auto px-8 py-7">

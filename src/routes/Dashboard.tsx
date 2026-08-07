@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/Card'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { cn } from '@/components/ui/cn'
 import { useAlerts } from '@/features/alerts/useAlerts'
-import { useAuth } from '@/features/auth/useAuth'
+import { useProfile } from '@/features/profile/useProfile'
 import { listOrderLists, ordersQueryKey } from '@/features/orders/orderRepository'
 import { formatQuantity } from '@/features/products/units'
 import { expiryPhrase, stockBadge, suggestedOrderQuantity } from '@/features/stock/status'
@@ -21,7 +21,7 @@ import type { StockOverviewRow } from '@/lib/database.types'
  * va périmer, ce qu'il reste à commander. Le reste est à un clic.
  */
 export function Dashboard() {
-  const { user } = useAuth()
+  const { displayName } = useProfile()
   const { current } = useTenancy()
   const { groups } = useAlerts()
 
@@ -49,7 +49,7 @@ export function Dashboard() {
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-[28px] font-extrabold tracking-[-0.03em]">
-            Salut {firstName(user?.user_metadata?.full_name, user?.email)} 👋
+            Salut {displayName} 👋
           </h1>
           <p className="text-ink-muted text-[15px]">
             {[
@@ -271,12 +271,3 @@ function StockTile({ item, alertDays }: { item: StockOverviewRow; alertDays: num
   )
 }
 
-/** « Salut Marco » plutôt que « Salut marco@chezmarco.fr ». */
-function firstName(fullName: unknown, email: string | undefined): string {
-  if (typeof fullName === 'string' && fullName.trim().length > 0) {
-    return fullName.trim().split(/\s+/)[0] ?? fullName.trim()
-  }
-  const localPart = email?.split('@')[0] ?? ''
-  const cleaned = localPart.split(/[._-]/)[0] ?? localPart
-  return cleaned.length > 0 ? cleaned.charAt(0).toUpperCase() + cleaned.slice(1) : 'toi'
-}

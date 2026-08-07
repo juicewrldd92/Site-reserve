@@ -4,7 +4,7 @@ import { BellIcon, ScanIcon } from '@/components/icons'
 import { Card } from '@/components/ui/Card'
 import { cn } from '@/components/ui/cn'
 import { useAlerts } from '@/features/alerts/useAlerts'
-import { useAuth } from '@/features/auth/useAuth'
+import { useProfile } from '@/features/profile/useProfile'
 import { formatQuantity } from '@/features/products/units'
 import { expiryPhrase, stockBadge } from '@/features/stock/status'
 import { EstablishmentSwitcher } from '@/features/tenancy/EstablishmentSwitcher'
@@ -12,7 +12,7 @@ import { useTenancy } from '@/features/tenancy/useTenancy'
 
 /** Accueil — switcher d'établissement, alertes chiffrées, CTA scan. */
 export function Home() {
-  const { user } = useAuth()
+  const { displayName } = useProfile()
   const { current } = useTenancy()
   const { groups } = useAlerts()
 
@@ -38,7 +38,7 @@ export function Home() {
 
       <div className="flex flex-col gap-0.5">
         <h1 className="text-[27px] font-extrabold tracking-[-0.03em]">
-          Salut {firstName(user?.user_metadata?.full_name, user?.email)} 👋
+          Salut {displayName} 👋
         </h1>
         <p className="text-ink-muted text-[15.5px]">Voilà ce qui bouge dans ta réserve.</p>
       </div>
@@ -157,12 +157,3 @@ function StatCard({
   )
 }
 
-/** « Salut Marco » plutôt que « Salut marco@chezmarco.fr ». */
-function firstName(fullName: unknown, email: string | undefined): string {
-  if (typeof fullName === 'string' && fullName.trim().length > 0) {
-    return fullName.trim().split(/\s+/)[0] ?? fullName.trim()
-  }
-  const localPart = email?.split('@')[0] ?? ''
-  const cleaned = localPart.split(/[._-]/)[0] ?? localPart
-  return cleaned.length > 0 ? cleaned.charAt(0).toUpperCase() + cleaned.slice(1) : 'toi'
-}
