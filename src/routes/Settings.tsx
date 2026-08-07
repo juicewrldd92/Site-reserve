@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { CloseIcon } from '@/components/icons'
 import { Card } from '@/components/ui/Card'
 import { cn } from '@/components/ui/cn'
+import { LocationsEditor } from '@/features/tenancy/LocationsEditor'
 import { Members } from '@/features/tenancy/Members'
 import { tenancyQueryKey } from '@/features/tenancy/tenancyContext'
 import { useTenancy } from '@/features/tenancy/useTenancy'
@@ -100,19 +101,7 @@ export function Settings() {
         </Card>
       </section>
 
-      <section className="flex flex-col gap-2.5">
-        <h2 className="text-[16px] font-bold">Emplacements</h2>
-        <Card className="flex flex-wrap gap-2 p-4">
-          {(current?.locations ?? []).map((location) => (
-            <span
-              key={location}
-              className="bg-corail-tint text-corail-ink rounded-full px-[14px] py-2 text-[13.5px] font-semibold"
-            >
-              {location}
-            </span>
-          ))}
-        </Card>
-      </section>
+      <LocationsEditor />
 
       <Members />
     </div>

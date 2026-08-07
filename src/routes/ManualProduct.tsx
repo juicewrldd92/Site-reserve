@@ -2,13 +2,23 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { type FormEvent, useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
-import { CheckIcon, CloseIcon, PlusIcon } from '@/components/icons'
+import {
+  CalendarIcon,
+  CheckIcon,
+  CloseIcon,
+  MinusIcon,
+  PlusIcon,
+} from '@/components/icons'
 import { Button } from '@/components/ui/Button'
+import { Card } from '@/components/ui/Card'
 import { Chip } from '@/components/ui/Chip'
 import { Field, FieldGroup } from '@/components/ui/Field'
 import { productsQueryKey } from '@/features/products/productKeys'
 import { createProduct, uploadProductImage } from '@/features/products/productRepository'
-import { PRODUCT_UNITS, unitLabel } from '@/features/products/units'
+import { UnitSelect } from '@/features/products/UnitSelect'
+import { unitLabel } from '@/features/products/units'
+import { ExpiryAlertSelect } from '@/features/stock/ExpiryAlertSelect'
+import { addToStock, stockQueryKey } from '@/features/stock/stockRepository'
 import { useTenancy } from '@/features/tenancy/useTenancy'
 import type { ProductUnit } from '@/lib/database.types'
 
@@ -45,6 +55,13 @@ export function ManualProduct() {
   const [photo, setPhoto] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
 
+  // Un produit créé ici doit atterrir dans le stock, pas seulement dans le
+  // catalogue : c'est le geste attendu quand on ajoute quelque chose.
+  const [quantity, setQuantity] = useState(1)
+  const [location, setLocation] = useState(current?.locations[0] ?? '')
+  const [expiry, setExpiry] = useState('')
+  const [leadDays, setLeadDays] = useState<number | null>(null)
+
   useEffect(() => {
     if (!photo) {
       setPreview(null)
@@ -64,7 +81,7 @@ export function ManualProduct() {
       // une image orpheline ne sert à personne.
       const imageUrl = photo ? await uploadProductImage(orgId, photo) : null
 
-      return createProduct({
+      const product = await createProduct({
         orgId,
         name,
         category,
@@ -73,9 +90,23 @@ export function ManualProduct() {
         source: 'manual',
         imageUrl,
       })
+
+      if (!current) throw new Error('Aucun établissement sélectionné.')
+      await addToStock({
+        establishmentId: current.id,
+        productId: product.id,
+        quantity,
+        unit,
+        location,
+        expiryDate: expiry === '' ? null : expiry,
+        alertLeadDays: leadDays,
+      })
+
+      return product
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: productsQueryKey })
+      await queryClient.invalidateQueries({ queryKey: stockQueryKey })
       navigate('/stock', { replace: true })
     },
   })
@@ -150,13 +181,68 @@ export function ManualProduct() {
             onChange={(e) => setName(e.target.value)}
           />
 
-          <FieldGroup label="Unité">
-            {PRODUCT_UNITS.map((option) => (
-              <Chip key={option} active={unit === option} onClick={() => setUnit(option)}>
-                {unitLabel(option, 2)}
-              </Chip>
-            ))}
-          </FieldGroup>
+          <Card className="flex items-center justify-between px-4 py-3.5">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-ink-muted text-[12.5px] font-semibold">Quantité</span>
+              <span className="text-[19px] font-bold">
+                {quantity}{' '}
+                <span className="text-ink-muted text-[14px] font-semibold">
+                  {unitLabel(unit, quantity)}
+                </span>
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                aria-label="Retirer un"
+                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                className="border-line flex h-10 w-10 items-center justify-center rounded-full border-[1.5px]"
+              >
+                <MinusIcon size={17} strokeWidth={2} />
+              </button>
+              <button
+                type="button"
+                aria-label="Ajouter un"
+                onClick={() => setQuantity((q) => q + 1)}
+                className="bg-corail flex h-10 w-10 items-center justify-center rounded-full text-white"
+              >
+                <PlusIcon size={17} strokeWidth={2} />
+              </button>
+            </div>
+          </Card>
+
+          <UnitSelect value={unit} onChange={setUnit} />
+
+          {current && current.locations.length > 0 && (
+            <FieldGroup label="Où le ranges-tu ?">
+              {current.locations.map((option) => (
+                <Chip
+                  key={option}
+                  active={location === option}
+                  onClick={() => setLocation(option)}
+                >
+                  {option}
+                </Chip>
+              ))}
+            </FieldGroup>
+          )}
+
+          <Card className="flex flex-col gap-1.5 px-4 py-3.5">
+            <span className="text-ink-muted text-[12.5px] font-semibold">
+              Date limite (optionnel)
+            </span>
+            <label className="flex items-center gap-2">
+              <CalendarIcon size={17} className="text-corail flex-none" />
+              <input
+                type="date"
+                value={expiry}
+                onChange={(e) => setExpiry(e.target.value)}
+                className="text-ink w-full border-0 bg-transparent text-[15px] font-bold outline-none"
+              />
+            </label>
+          </Card>
+
+          {expiry !== '' && <ExpiryAlertSelect value={leadDays} onChange={setLeadDays} />}
 
           <FieldGroup label="Catégorie">
             {CATEGORIES.map((option) => (
@@ -185,7 +271,7 @@ export function ManualProduct() {
 
         <div className="mt-auto pt-8">
           <Button type="submit" disabled={name.trim().length === 0 || save.isPending}>
-            {save.isPending ? 'On enregistre…' : 'Ajouter au catalogue'}
+            {save.isPending ? 'On enregistre…' : 'Ajouter au stock'}
           </Button>
         </div>
       </form>

@@ -17,6 +17,14 @@ import type { StockOverviewRow } from '@/lib/database.types'
 
 type Sort = 'name' | 'quantity' | 'expiry'
 type Mode = 'grid' | 'inventory'
+type StatusFilter = 'all' | 'attention' | 'expiring' | 'low'
+
+const STATUS_LABELS: Record<StatusFilter, string> = {
+  all: 'Tous les statuts',
+  attention: 'À traiter',
+  expiring: 'DLC proche ou périmé',
+  low: 'Stock bas ou rupture',
+}
 
 const SORT_LABELS: Record<Sort, string> = {
   name: 'Nom',
@@ -34,6 +42,8 @@ export function Stock() {
 
   const [search, setSearch] = useState('')
   const [location, setLocation] = useState<string | null>(null)
+  const [category, setCategory] = useState<string | null>(null)
+  const [status, setStatus] = useState<StatusFilter>('all')
   const [sort, setSort] = useState<Sort>('name')
   const [mode, setMode] = useState<Mode>('grid')
   const [selected, setSelected] = useState<StockOverviewRow | null>(null)
@@ -52,6 +62,19 @@ export function Stock() {
 
     const filtered = all.filter((item) => {
       if (location !== null && item.location !== location) return false
+      if (category !== null && item.category !== category) return false
+
+      if (status !== 'all') {
+        const s = stockStatus(item, alertDays)
+        const matches =
+          status === 'attention'
+            ? s !== 'ok'
+            : status === 'expiring'
+              ? s === 'expiring' || s === 'expired'
+              : s === 'low' || s === 'out'
+        if (!matches) return false
+      }
+
       if (needle.length === 0) return true
       return [item.name, item.brand, item.category].some((field) =>
         field?.toLowerCase().includes(needle),
@@ -68,12 +91,27 @@ export function Stock() {
       }
       return a.name.localeCompare(b.name, 'fr')
     })
-  }, [stock.data, search, location, sort])
+  }, [stock.data, search, location, category, status, sort, alertDays])
 
+  // Les filtres se construisent à partir de ce qui est réellement en stock :
+  // pas de case vide, et les emplacements renommés suivent tout seuls.
   const locations = useMemo(
-    () => [...new Set((stock.data ?? []).map((item) => item.location).filter(Boolean))],
+    () => [...new Set((stock.data ?? []).map((item) => item.location).filter(Boolean))].sort(),
     [stock.data],
   )
+
+  const categories = useMemo(
+    () =>
+      [
+        ...new Set(
+          (stock.data ?? []).map((item) => item.category).filter((c): c is string => Boolean(c)),
+        ),
+      ].sort(),
+    [stock.data],
+  )
+
+  const activeFilters =
+    (location !== null ? 1 : 0) + (category !== null ? 1 : 0) + (status !== 'all' ? 1 : 0)
 
   if (stock.isSuccess && stock.data.length === 0) {
     return (
@@ -113,7 +151,14 @@ export function Stock() {
       </label>
 
       <div className="no-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5">
-        <FilterChip active={location === null} onClick={() => setLocation(null)}>
+        <FilterChip
+          active={activeFilters === 0}
+          onClick={() => {
+            setLocation(null)
+            setCategory(null)
+            setStatus('all')
+          }}
+        >
           Tout <span className="opacity-60">{stock.data?.length ?? 0}</span>
         </FilterChip>
         {locations.map((option) => (
@@ -123,6 +168,24 @@ export function Stock() {
             onClick={() => setLocation(option)}
           >
             {option}
+          </FilterChip>
+        ))}
+        {categories.map((option) => (
+          <FilterChip
+            key={option}
+            active={category === option}
+            onClick={() => setCategory(category === option ? null : option)}
+          >
+            {option}
+          </FilterChip>
+        ))}
+        {(['attention', 'expiring', 'low'] as const).map((option) => (
+          <FilterChip
+            key={option}
+            active={status === option}
+            onClick={() => setStatus(status === option ? 'all' : option)}
+          >
+            {STATUS_LABELS[option]}
           </FilterChip>
         ))}
         <button
@@ -137,6 +200,20 @@ export function Stock() {
           {SORT_LABELS[sort]}
         </button>
       </div>
+
+      {activeFilters > 0 && (
+        <button
+          type="button"
+          onClick={() => {
+            setLocation(null)
+            setCategory(null)
+            setStatus('all')
+          }}
+          className="text-ink-muted self-start text-[13px] font-semibold underline"
+        >
+          Effacer les filtres ({activeFilters})
+        </button>
+      )}
 
       <div className="flex gap-2">
         <ModeChip active={mode === 'grid'} onClick={() => setMode('grid')}>
