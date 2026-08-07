@@ -189,14 +189,23 @@ export function Scan() {
           </div>
         )}
 
-        <button
-          type="button"
-          onClick={() => navigate('/produit/nouveau')}
-          className="flex h-14 items-center justify-center gap-2.5 rounded-full border-[1.6px] border-white/55 bg-white/10 text-[15.5px] font-bold text-white backdrop-blur-sm"
-        >
-          <PlusIcon size={19} strokeWidth={2} />
-          Ajouter sans code-barre
-        </button>
+        <div className="flex gap-2.5">
+          <button
+            type="button"
+            onClick={() => navigate('/produit/nouveau')}
+            className="flex h-14 flex-1 items-center justify-center gap-2 rounded-full border-[1.6px] border-white/55 bg-white/10 text-[14.5px] font-bold text-white backdrop-blur-sm"
+          >
+            <PlusIcon size={18} strokeWidth={2} />
+            Sans code-barre
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/ticket')}
+            className="flex h-14 flex-1 items-center justify-center gap-2 rounded-full border-[1.6px] border-white/55 bg-white/10 text-[14.5px] font-bold text-white backdrop-blur-sm"
+          >
+            Scanner un ticket
+          </button>
+        </div>
 
         {status === 'scanning' && (
           <p className="text-center font-mono text-[11px] text-white/40">

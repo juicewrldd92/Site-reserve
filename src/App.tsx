@@ -23,6 +23,12 @@ import { Welcome } from '@/routes/Welcome'
 // pour que l'app démarre vite sur un téléphone de cuisine.
 const Scan = lazy(() => import('@/routes/Scan').then((m) => ({ default: m.Scan })))
 
+// Tesseract pèse plusieurs mégaoctets : chargé seulement à l'ouverture de
+// l'écran de ticket.
+const ReceiptScan = lazy(() =>
+  import('@/routes/ReceiptScan').then((m) => ({ default: m.ReceiptScan })),
+)
+
 // La vitrine n'a rien à faire dans le bundle de l'app : elle est publique et
 // ne sert qu'une fois, avant l'inscription.
 const Landing = lazy(() =>
@@ -80,6 +86,14 @@ export function App() {
                   }
                 />
                 <Route path="/produit/nouveau" element={<ManualProduct />} />
+                <Route
+                  path="/ticket"
+                  element={
+                    <Suspense fallback={<Splash />}>
+                      <ReceiptScan />
+                    </Suspense>
+                  }
+                />
 
                 <Route element={<AppShell />}>
                   <Route index element={<Overview />} />
