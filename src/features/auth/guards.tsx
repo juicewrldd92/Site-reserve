@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { Suspense, lazy, type ReactNode } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 
 import { useTenancy } from '@/features/tenancy/useTenancy'
@@ -6,6 +6,8 @@ import { SetupNeeded } from '@/routes/SetupNeeded'
 import { Splash } from '@/routes/Splash'
 
 import { useAuth } from './useAuth'
+
+const Landing = lazy(() => import('@/routes/Landing').then((m) => ({ default: m.Landing })))
 
 /** Écrans d'accueil / connexion : inaccessibles une fois connecté. */
 export function PublicOnly({ children }: { children: ReactNode }) {
@@ -47,11 +49,22 @@ export function RequireOnboarding({ children }: { children: ReactNode }) {
 /** Session + au moins un établissement accessible. Le reste de l'app. */
 export function RequireEstablishment() {
   const { status } = useAuth()
+  const location = useLocation()
   const { isLoading, needsOnboarding, error } = useTenancy()
 
   if (status === 'unconfigured') return <SetupNeeded />
   if (status === 'loading') return <Splash />
-  if (status === 'anonymous') return <Navigate to="/bienvenue" replace />
+  // Un visiteur non connecté sur « / » voit la vitrine, pas une redirection :
+  // c'est la page qu'on partage, elle doit répondre à l'adresse racine.
+  if (status === 'anonymous') {
+    return location.pathname === '/' ? (
+      <Suspense fallback={<Splash />}>
+        <Landing />
+      </Suspense>
+    ) : (
+      <Navigate to="/bienvenue" replace />
+    )
+  }
   if (isLoading) return <Splash />
   if (error) return <TenancyError message={error.message} />
   if (needsOnboarding) return <Navigate to="/onboarding" replace />

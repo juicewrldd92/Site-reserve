@@ -152,3 +152,25 @@ function guessUnit(quantity: string | null): ProductUnit {
   if (/\d\s*g\b/.test(text)) return 'g'
   return 'piece'
 }
+
+/**
+ * Remplace la photo d'un produit.
+ *
+ * Utile quand Open Food Facts renvoie une photo floue, une autre déclinaison,
+ * ou rien du tout — ce qui arrive souvent sur les formats professionnels.
+ * L'ancienne image reste dans le Storage : la supprimer ferait disparaître la
+ * photo de tous les écrans encore ouverts ailleurs.
+ */
+export async function replaceProductImage(
+  orgId: string,
+  productId: string,
+  source: Blob,
+): Promise<string> {
+  const imageUrl = await uploadProductImage(orgId, source)
+  const { error } = await getSupabase()
+    .from('products')
+    .update({ image_url: imageUrl })
+    .eq('id', productId)
+  if (error) throw new Error(error.message)
+  return imageUrl
+}

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { CalendarIcon, MinusIcon, PlusIcon } from '@/components/icons'
 import { BottomSheet } from '@/components/ui/BottomSheet'
@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Select } from '@/components/ui/Select'
 import { cn } from '@/components/ui/cn'
+import { productsQueryKey } from '@/features/products/productKeys'
+import { replaceProductImage } from '@/features/products/productRepository'
 import { UnitSelect } from '@/features/products/UnitSelect'
 import { unitLabel } from '@/features/products/units'
 import { useTenancy } from '@/features/tenancy/useTenancy'
@@ -45,6 +47,22 @@ export function StockDetailSheet({
   const [newBatchDate, setNewBatchDate] = useState('')
   const [newBatchQty, setNewBatchQty] = useState('1')
 
+  // Photo du produit : celle d'Open Food Facts est parfois floue, parfois une
+  // autre déclinaison, parfois absente sur les formats professionnels.
+  const photoInput = useRef<HTMLInputElement>(null)
+  const [photo, setPhoto] = useState<File | null>(null)
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!photo) {
+      setPhotoPreview(null)
+      return
+    }
+    const url = URL.createObjectURL(photo)
+    setPhotoPreview(url)
+    return () => URL.revokeObjectURL(url)
+  }, [photo])
+
   const batches = useQuery({
     queryKey: [...stockQueryKey, 'batches', item.id],
     queryFn: () => listBatches(item.id),
@@ -60,6 +78,18 @@ export function StockDetailSheet({
   const refresh = async () => {
     await queryClient.invalidateQueries({ queryKey: stockQueryKey })
   }
+
+  const savePhoto = useMutation({
+    mutationFn: async () => {
+      if (!current || !photo) throw new Error('Aucune photo à enregistrer.')
+      await replaceProductImage(current.org_id, item.product_id, photo)
+    },
+    onSuccess: async () => {
+      setPhoto(null)
+      await queryClient.invalidateQueries({ queryKey: productsQueryKey })
+      await refresh()
+    },
+  })
 
   const save = useMutation({
     mutationFn: () =>
@@ -103,11 +133,23 @@ export function StockDetailSheet({
     <BottomSheet open={open} onClose={onClose}>
       <div className="flex flex-col gap-3 pb-2">
         <div className="flex items-center gap-4">
-          <span className="photo-ph h-20 w-20 flex-none overflow-hidden rounded-[20px]">
-            {item.image_url && (
-              <img src={item.image_url} alt="" className="h-full w-full object-cover" />
+          <button
+            type="button"
+            onClick={() => photoInput.current?.click()}
+            aria-label="Changer la photo du produit"
+            className="photo-ph relative h-20 w-20 flex-none overflow-hidden rounded-[20px]"
+          >
+            {(photoPreview ?? item.image_url) && (
+              <img
+                src={photoPreview ?? item.image_url ?? ''}
+                alt=""
+                className="h-full w-full object-cover"
+              />
             )}
-          </span>
+            <span className="bg-ink/55 absolute inset-x-0 bottom-0 py-1 text-[10px] font-bold text-white">
+              {photoPreview ? 'Nouvelle' : 'Changer'}
+            </span>
+          </button>
           <div className="flex min-w-0 flex-col gap-1">
             <span className="text-[20px] leading-tight font-extrabold tracking-[-0.025em]">
               {item.name}
@@ -117,6 +159,38 @@ export function StockDetailSheet({
             </span>
           </div>
         </div>
+
+        <input
+          ref={photoInput}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="hidden"
+          onChange={(e) => setPhoto(e.target.files?.[0] ?? null)}
+        />
+
+        {photo && (
+          <div className="flex gap-2">
+            <Button size="md" onClick={() => savePhoto.mutate()} disabled={savePhoto.isPending}>
+              {savePhoto.isPending ? 'On envoie…' : 'Enregistrer la photo'}
+            </Button>
+            <Button
+              size="md"
+              variant="secondary"
+              block={false}
+              className="px-5"
+              onClick={() => setPhoto(null)}
+            >
+              Annuler
+            </Button>
+          </div>
+        )}
+
+        {savePhoto.isError && (
+          <p className="bg-alert-bg text-alert-ink rounded-card px-4 py-3 text-[13px] font-semibold">
+            {savePhoto.error.message}
+          </p>
+        )}
 
         <Card className="flex items-center justify-between px-4 py-3.5">
           <div className="flex flex-col gap-0.5">

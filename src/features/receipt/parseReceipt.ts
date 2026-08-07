@@ -64,13 +64,47 @@ const NOISE = [
   'adresse',
   'code postal',
   'www',
+  'sur carte',
+  'dont tva',
+  'montant',
+  'solde',
+  'reste a payer',
+  'nb articles',
+  'qte',
+  'quantite',
+  'sous reserve',
+  'echange',
+  'garantie',
+  'ouvert',
+  'horaires',
+  'rue',
+  'avenue',
+  'boulevard',
+  'service',
+  'net',
+  'brut',
+  'acompte',
+  'especes recues',
 ]
 
-/** Prix en fin de ligne : « 2,49 », « 2.49 € », « 12,00€ ». */
-const PRICE_AT_END = /(\d{1,4})[.,](\d{2})\s*(?:€|eur)?\s*[a-z]?\s*$/i
+/**
+ * Prix en fin de ligne : « 2,49 », « 2.49 € », « 12,00€ », « 2 49 ».
+ * Le suffixe optionnel absorbe le code de TVA que beaucoup de caisses collent
+ * derrière le montant (« 2,49 A », « 3,80 B »).
+ */
+const PRICE_AT_END = /(\d{1,4})\s*[.,]\s*(\d{2})\s*(?:€|eur|e)?\s*[a-z]?\s*$/i
 
 /** Quantité en tête : « 2 x », « 3X », « 2 » suivi d'un mot. */
 const LEADING_QUANTITY = /^(\d{1,3})\s*[x×]?\s+(?=\S)/i
+
+/** Quantité en fin de libellé : « TOMATES x3 », « BASILIC X 2 ». */
+const TRAILING_QUANTITY = /\s[x×]\s*(\d{1,3})\s*$/i
+
+/**
+ * Ligne de remise : le montant est négatif et ne correspond à aucun produit.
+ * « REMISE -1,00 », « -0,50 », « AVOIR 2,00- ».
+ */
+const DISCOUNT = /(^|\s)-\s*\d|\d\s*-\s*$/
 
 /** Poids au kilo : « 0,850 kg x 8,90 ». */
 const WEIGHT_LINE = /(\d+[.,]\d{1,3})\s*kg/i
@@ -96,7 +130,29 @@ function isNoise(label: string): boolean {
   )
 }
 
-/** « BQT BASILIC » → « Bqt basilic ». Le ticket crie, pas nous. */
+/**
+ * Abréviations qu'on retrouve sur presque tous les tickets français.
+ * Développées pour que le libellé proposé soit lisible sans réécriture.
+ */
+const ABBREVIATIONS: Array<[RegExp, string]> = [
+  [/\bbqt\b/gi, 'botte'],
+  [/\bbte\b/gi, 'boîte'],
+  [/\bbtl\b/gi, 'bouteille'],
+  [/\bpqt\b/gi, 'paquet'],
+  [/\bfilet\b/gi, 'filet'],
+  [/\bsach\b/gi, 'sachet'],
+  [/\bbrq\b/gi, 'brique'],
+  [/\bcrm\b/gi, 'crème'],
+  [/\bfrom\b/gi, 'fromage'],
+  [/\bemmt\b/gi, 'emmental'],
+  [/\bch\.?\s?paris\b/gi, 'champignons de Paris'],
+  [/\bpdt\b/gi, 'pomme de terre'],
+  [/\btom\b/gi, 'tomate'],
+  [/\bcgt\b/gi, 'courgette'],
+  [/\bpqte\b/gi, 'paquet'],
+]
+
+/** « BQT BASILIC » → « Botte basilic ». Le ticket crie et abrège, pas nous. */
 function tidyLabel(raw: string): string {
   const cleaned = raw
     .replace(/[*#•|]+/g, ' ')
@@ -106,9 +162,16 @@ function tidyLabel(raw: string): string {
     .trim()
 
   if (cleaned.length === 0) return ''
+
   // Tout en majuscules sur un ticket : on repasse en casse de phrase.
   const isShouting = cleaned === cleaned.toUpperCase()
-  const base = isShouting ? cleaned.toLowerCase() : cleaned
+  let base = isShouting ? cleaned.toLowerCase() : cleaned
+
+  for (const [pattern, replacement] of ABBREVIATIONS) {
+    base = base.replace(pattern, replacement)
+  }
+  base = base.replace(/\s{2,}/g, ' ').trim()
+
   return base.charAt(0).toUpperCase() + base.slice(1)
 }
 
@@ -125,6 +188,10 @@ export function parseReceipt(text: string): ReceiptLine[] {
     const line = rawLine.trim()
     if (line.length === 0) continue
 
+    // Une remise n'est pas un achat : l'ajouter au stock ferait entrer un
+    // produit fantôme.
+    if (DISCOUNT.test(line)) continue
+
     const priceMatch = PRICE_AT_END.exec(line)
     if (!priceMatch) continue
 
@@ -139,9 +206,14 @@ export function parseReceipt(text: string): ReceiptLine[] {
       rest = rest.replace(WEIGHT_LINE, ' ')
     } else {
       const leading = LEADING_QUANTITY.exec(rest)
+      const trailing = TRAILING_QUANTITY.exec(rest)
       if (leading?.[1]) {
         quantity = Number(leading[1])
         rest = rest.slice(leading[0].length)
+      } else if (trailing?.[1]) {
+        // Certaines caisses mettent la quantité après le libellé.
+        quantity = Number(trailing[1])
+        rest = rest.slice(0, trailing.index)
       }
     }
 
