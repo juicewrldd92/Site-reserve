@@ -6,6 +6,7 @@ import { CloseIcon } from '@/components/icons'
 import { Card } from '@/components/ui/Card'
 import { cn } from '@/components/ui/cn'
 import { ProfileSection } from '@/features/profile/ProfileSection'
+import { EstablishmentPhoto } from '@/features/tenancy/EstablishmentPhoto'
 import { LocationsEditor } from '@/features/tenancy/LocationsEditor'
 import { Members } from '@/features/tenancy/Members'
 import { tenancyQueryKey } from '@/features/tenancy/tenancyContext'
@@ -50,16 +51,7 @@ export function Settings() {
         <span className="w-10" />
       </header>
 
-      <Card className="flex items-center gap-3.5 p-4">
-        <span className="photo-ph h-14 w-14 flex-none rounded-[18px]" />
-        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <span className="truncate text-[17px] font-bold">{current?.name}</span>
-          <span className="text-ink-muted text-[13px]">
-            {[current?.cuisine_type, current?.address].filter(Boolean).join(' · ') ||
-              'Établissement'}
-          </span>
-        </div>
-      </Card>
+      <EstablishmentPhoto />
 
       <ProfileSection />
 

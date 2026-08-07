@@ -32,6 +32,7 @@ export type EstablishmentRow = {
   cuisine_type: string | null
   address: string | null
   locations: string[]
+  image_url: string | null
   /** Nombre de jours avant DLC qui déclenche une alerte. */
   dlc_alert_days: number
   created_at: string

@@ -33,7 +33,11 @@ export function EstablishmentSwitcher() {
         onClick={() => setOpen(true)}
         className="bg-surface shadow-pill flex items-center gap-[11px] rounded-full py-[7px] pr-3.5 pl-[7px]"
       >
-        <span className="photo-ph block h-[34px] w-[34px] rounded-full" />
+        <span className="photo-ph block h-[34px] w-[34px] flex-none overflow-hidden rounded-full">
+          {current?.image_url && (
+            <img src={current.image_url} alt="" className="h-full w-full object-cover" />
+          )}
+        </span>
         <span className="max-w-[170px] truncate text-[15px] font-bold">
           {current?.name ?? 'Ton resto'}
         </span>
@@ -64,7 +68,15 @@ export function EstablishmentSwitcher() {
                   active && 'border-corail border-[1.5px]',
                 )}
               >
-                <span className="photo-ph rounded-thumb h-12 w-12 flex-none" />
+                <span className="photo-ph rounded-thumb h-12 w-12 flex-none overflow-hidden">
+                  {establishment.image_url && (
+                    <img
+                      src={establishment.image_url}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  )}
+                </span>
                 <span className="flex flex-1 flex-col gap-0.5">
                   <span className="text-[15px] font-bold">{establishment.name}</span>
                   <span className="text-ink-muted text-[12.5px]">
