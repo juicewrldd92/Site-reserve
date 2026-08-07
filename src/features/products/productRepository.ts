@@ -177,3 +177,48 @@ export async function replaceProductImage(
   if (error) throw new Error(error.message)
   return imageUrl
 }
+
+/**
+ * Rapatrie dans notre Storage les photos encore hébergées ailleurs.
+ *
+ * Le jeu de démonstration pointe directement vers Open Food Facts : un script
+ * SQL ne peut pas téléverser d'images. Ces URL sont lentes et hors de notre
+ * contrôle — et le service worker ne peut pas garantir leur mise en cache.
+ *
+ * Une fois rapatriées, les photos se chargent à la vitesse du reste de l'app
+ * et restent visibles hors-ligne.
+ *
+ * @param onProgress appelé après chaque photo, pour afficher l'avancement.
+ * @returns le nombre de photos rapatriées.
+ */
+export async function mirrorExternalImages(
+  orgId: string,
+  onProgress?: (done: number, total: number) => void,
+): Promise<number> {
+  const supabase = getSupabase()
+
+  const { data, error } = await supabase
+    .from('products')
+    .select('id, image_url')
+    .eq('org_id', orgId)
+    .not('image_url', 'is', null)
+  if (error) throw new Error(error.message)
+
+  const external = data.filter(
+    (p) => p.image_url !== null && !p.image_url.includes('.supabase.co/storage/'),
+  )
+
+  let done = 0
+  for (const product of external) {
+    const mirrored = await mirrorRemoteImage(orgId, product.image_url as string)
+    // Une photo qui ne se télécharge pas n'est pas une raison d'arrêter : on
+    // garde l'URL d'origine et on passe à la suivante.
+    if (mirrored) {
+      await supabase.from('products').update({ image_url: mirrored }).eq('id', product.id)
+      done += 1
+    }
+    onProgress?.(done, external.length)
+  }
+
+  return done
+}
