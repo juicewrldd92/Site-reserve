@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { getSupabase } from '@/lib/supabase'
 
+import { addLocation, dedupeLocations, locationKey, normalizeLocation } from './locations'
 import { tenancyQueryKey } from './tenancyContext'
 import { useTenancy } from './useTenancy'
 
@@ -46,18 +47,22 @@ export function LocationsEditor() {
   const rename = useMutation({
     mutationFn: async ({ from, to }: { from: string; to: string }) => {
       if (!current) throw new Error('Aucun établissement sélectionné.')
+      if (locationKey(to) !== locationKey(from) &&
+          locations.some((l) => locationKey(l) === locationKey(to))) {
+        throw new Error('Un emplacement porte déjà ce nom.')
+      }
       const supabase = getSupabase()
 
       // Les lignes de stock d'abord : si la seconde requête échoue, on préfère
       // un emplacement en double à des produits pointant vers le néant.
       const moved = await supabase
         .from('stock_items')
-        .update({ location: to })
+        .update({ location: normalizeLocation(to) })
         .eq('establishment_id', current.id)
         .eq('location', from)
       if (moved.error) throw new Error(moved.error.message)
 
-      const next = locations.map((l) => (l === from ? to : l))
+      const next = dedupeLocations(locations.map((l) => (l === from ? to : l)))
       const saved = await supabase
         .from('establishments')
         .update({ locations: next })
@@ -74,9 +79,14 @@ export function LocationsEditor() {
 
   function add(event: FormEvent) {
     event.preventDefault()
-    const value = draft.trim()
-    if (value.length === 0 || locations.includes(value)) return
-    persist.mutate([...locations, value])
+    const next = addLocation(locations, draft)
+    // `addLocation` renvoie la liste inchangée si l'emplacement existe déjà,
+    // même écrit avec une autre casse ou d'autres accents.
+    if (next.length === locations.length) {
+      setDraft('')
+      return
+    }
+    persist.mutate(dedupeLocations(next))
     setDraft('')
   }
 

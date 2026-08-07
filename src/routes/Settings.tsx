@@ -6,6 +6,7 @@ import { CloseIcon } from '@/components/icons'
 import { Card } from '@/components/ui/Card'
 import { cn } from '@/components/ui/cn'
 import { ProfileSection } from '@/features/profile/ProfileSection'
+import { NotificationsCard } from '@/features/alerts/NotificationsCard'
 import { EstablishmentPhoto } from '@/features/tenancy/EstablishmentPhoto'
 import { LocationsEditor } from '@/features/tenancy/LocationsEditor'
 import { Members } from '@/features/tenancy/Members'
@@ -95,6 +96,8 @@ export function Settings() {
           )}
         </Card>
       </section>
+
+      <NotificationsCard />
 
       <LocationsEditor />
 

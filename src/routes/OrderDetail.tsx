@@ -169,7 +169,7 @@ export function OrderDetail() {
       <div className="flex gap-2">
         <StatusStep label="À commander" done={true} current={!isOrdered && !isReceived} />
         <StatusStep label="Commandée" done={isOrdered || isReceived} current={isOrdered} />
-        <StatusStep label="Reçue" done={isReceived} current={isReceived} />
+        <StatusStep label="Validée" done={isReceived} current={isReceived} />
       </div>
 
       <Button
@@ -307,15 +307,15 @@ export function OrderDetail() {
 
           {isOrdered && (
             <Button onClick={() => receive.mutate()} disabled={receive.isPending}>
-              {receive.isPending ? 'On range…' : 'Marquer comme reçue'}
+              {receive.isPending ? 'On met à jour le stock…' : 'Valider la réception'}
             </Button>
           )}
 
           {isReceived && (
             <p className="bg-ok-bg text-ok-ink rounded-card px-4 py-3 text-center text-[13.5px] font-semibold">
-              Commande reçue le{' '}
+              Commande validée le{' '}
               {new Date(list.data?.received_at ?? Date.now()).toLocaleDateString('fr-FR')} —
-              le stock a été mis à jour.
+              les quantités cochées sont entrées en stock.
             </p>
           )}
 
