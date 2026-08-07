@@ -37,7 +37,10 @@ export async function findByBarcode(
  * une photo qui disparaît casse l'écran signature de l'app.
  */
 export async function uploadProductImage(orgId: string, source: Blob): Promise<string> {
-  const { blob, extension, contentType } = await prepareImage(source)
+  // 640 px : la vignette fait 132 px dans la grille, la fiche 150 px. Au-delà
+  // on téléchargerait des pixels que personne ne voit, sur le réseau d'une
+  // réserve. 1024 px pesait deux fois et demie plus lourd.
+  const { blob, extension, contentType } = await prepareImage(source, { maxEdge: 640 })
   // Chemin `<org_id>/<uuid>` : la policy Storage vérifie le premier segment.
   const path = `${orgId}/${crypto.randomUUID()}.${extension}`
 

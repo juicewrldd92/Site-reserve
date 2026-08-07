@@ -60,6 +60,31 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
         navigateFallback: '/index.html',
         cleanupOutdatedCaches: true,
+        runtimeCaching: [
+          {
+            // Photos de produits, d'établissements et de profil.
+            // « Cache d'abord » : une photo ne change jamais — son URL contient
+            // un identifiant unique, une nouvelle photo a une nouvelle URL.
+            // Sans ça, chaque écran les retélécharge, et elles disparaissent
+            // hors-ligne alors que c'est là qu'on en a le plus besoin.
+            urlPattern: ({ url, request }) =>
+              request.destination === 'image' &&
+              (url.hostname.endsWith('.supabase.co') ||
+                url.hostname.endsWith('openfoodfacts.org')),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'reserve-photos',
+              expiration: {
+                // Un gros stock tourne autour de 150 produits ; 300 laisse de
+                // la marge sans saturer le téléphone.
+                maxEntries: 300,
+                maxAgeSeconds: 60 * 60 * 24 * 60,
+                purgeOnQuotaError: true,
+              },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+        ],
       },
       devOptions: {
         // Désactivé volontairement. Un service worker en dev finit par servir

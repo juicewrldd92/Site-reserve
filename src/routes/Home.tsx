@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 
 import { BellIcon, ScanIcon } from '@/components/icons'
 import { Card } from '@/components/ui/Card'
+import { Photo } from '@/components/ui/Photo'
 import { cn } from '@/components/ui/cn'
 import { useAlerts } from '@/features/alerts/useAlerts'
 import { useProfile } from '@/features/profile/useProfile'
@@ -94,16 +95,11 @@ export function Home() {
                   to="/alertes"
                   className="bg-surface rounded-card shadow-card flex items-center gap-3 p-2.5"
                 >
-                  <span className="photo-ph rounded-thumb h-14 w-14 flex-none overflow-hidden">
-                    {item.image_url && (
-                      <img
-                        src={item.image_url}
-                        alt=""
-                        loading="lazy"
-                        className="h-full w-full object-cover"
-                      />
-                    )}
-                  </span>
+                  <Photo
+                    src={item.image_url}
+                    size={56}
+                    className="rounded-thumb h-14 w-14 flex-none"
+                  />
                   <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                     <span className="truncate text-[15px] font-bold">{item.name}</span>
                     <span className="text-ink-muted text-[13px]">

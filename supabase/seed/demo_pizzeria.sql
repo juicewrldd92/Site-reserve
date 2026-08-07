@@ -22,7 +22,7 @@ declare
   -- │ Laisse NULL pour prendre le seul que tu as, ou écris son nom exact  │
   -- │ entre apostrophes, par exemple : 'Le Castello'                      │
   -- └─────────────────────────────────────────────────────────────────────┘
-  c_etablissement constant text := null;
+  c_etablissement constant text := 'Chez marcoo';
 
   v_est   uuid;
   v_org   uuid;
@@ -64,10 +64,10 @@ begin
   for v_row in
     select * from (values
     ('3564700004623', 'Tomates entières pelées au jus', 'Marque Repère', 'https://images.openfoodfacts.org/images/products/356/470/000/4623/front_fr.65.400.jpg', 'Épicerie', 'boite'::public.product_unit, 'openfoodfacts'::public.product_source, 18, 12, 36, 'Réserve sèche', null),
-    ('8000430138719', 'Mozzarella', 'Galbani', 'https://images.openfoodfacts.org/images/products/800/043/013/8719/front_en.91.400.jpg', 'Crèmerie', 'piece'::public.product_unit, 'openfoodfacts'::public.product_source, 6, 8, 24, 'Frigo cuisine', 2),
+    ('8000430138719', 'Mozzarella', 'Galbani', 'https://images.openfoodfacts.org/images/products/800/043/013/8719/front_en.91.400.jpg', 'Crémerie', 'piece'::public.product_unit, 'openfoodfacts'::public.product_source, 6, 8, 24, 'Frigo cuisine', 2),
     ('3245414662926', 'Farine de blé type 55', 'Carrefour', 'https://images.openfoodfacts.org/images/products/324/541/466/2926/front_fr.95.400.jpg', 'Épicerie', 'sac'::public.product_unit, 'openfoodfacts'::public.product_source, 4, 3, 10, 'Réserve sèche', null),
-    ('3250392334352', 'Parmigiano reggiano aop rape 12 mois lc 60g', 'Itinéraire des Saveurs', 'https://images.openfoodfacts.org/images/products/325/039/233/4352/front_fr.45.400.jpg', 'Crèmerie', 'piece'::public.product_unit, 'openfoodfacts'::public.product_source, 2, 3, 8, 'Frigo cuisine', 25),
-    ('3155250001554', 'Crème fraîche épaisse', 'Bridélice', 'https://images.openfoodfacts.org/images/products/315/525/000/1554/front_fr.138.400.jpg', 'Crèmerie', 'brique'::public.product_unit, 'openfoodfacts'::public.product_source, 3, 4, 12, 'Frigo cuisine', 6),
+    ('3250392334352', 'Parmigiano reggiano aop rape 12 mois lc 60g', 'Itinéraire des Saveurs', 'https://images.openfoodfacts.org/images/products/325/039/233/4352/front_fr.45.400.jpg', 'Crémerie', 'piece'::public.product_unit, 'openfoodfacts'::public.product_source, 2, 3, 8, 'Frigo cuisine', 25),
+    ('3155250001554', 'Crème fraîche épaisse', 'Bridélice', 'https://images.openfoodfacts.org/images/products/315/525/000/1554/front_fr.138.400.jpg', 'Crémerie', 'brique'::public.product_unit, 'openfoodfacts'::public.product_source, 3, 4, 12, 'Frigo cuisine', 6),
     ('3302740047367', 'Le Supérieur - à l''Etouffée - Conservation sans Nitrite', 'Fleury Michon', 'https://images.openfoodfacts.org/images/products/330/274/004/7367/front_fr.304.400.jpg', 'Viande', 'barquette'::public.product_unit, 'openfoodfacts'::public.product_source, 2, 3, 9, 'Frigo cuisine', 1),
     ('3083681120578', 'Champignon émincé sans sulfite 1/2', 'Bonduelle', 'https://images.openfoodfacts.org/images/products/308/368/112/0578/front_fr.39.400.jpg', 'Épicerie', 'boite'::public.product_unit, 'openfoodfacts'::public.product_source, 9, 6, 18, 'Réserve sèche', null),
     ('3017230000059', 'Olives noires confites dénoyautées bocal 150g', 'Tramier', 'https://images.openfoodfacts.org/images/products/301/723/000/0059/front_fr.71.400.jpg', 'Épicerie', 'boite'::public.product_unit, 'openfoodfacts'::public.product_source, 5, 4, 12, 'Réserve sèche', null),
@@ -75,8 +75,8 @@ begin
     ('6111162001201', 'Delicia double concentre de tomates', 'Delicia', 'https://images.openfoodfacts.org/images/products/611/116/200/1201/front_en.19.400.jpg', 'Épicerie', 'boite'::public.product_unit, 'openfoodfacts'::public.product_source, 14, 8, 24, 'Réserve sèche', null),
     ('8029689026066', 'PASSATA', 'Bio organica', 'https://images.openfoodfacts.org/images/products/802/968/902/6066/front_fr.3.400.jpg', 'Épicerie', 'bouteille'::public.product_unit, 'openfoodfacts'::public.product_source, 11, 8, 24, 'Réserve sèche', null),
     ('8422767123211', 'El nuestro aceite de oliva virgen extra bidón', 'Hojiblanca', 'https://images.openfoodfacts.org/images/products/842/276/712/3211/front_fr.19.400.jpg', 'Épicerie', 'bidon'::public.product_unit, 'openfoodfacts'::public.product_source, 3, 2, 6, 'Réserve sèche', null),
-    ('3523230028431', 'La bûche Sainte-Maure (Poitou-Charentes', 'Soignon', 'https://images.openfoodfacts.org/images/products/352/323/002/8431/front_en.175.400.jpg', 'Crèmerie', 'piece'::public.product_unit, 'openfoodfacts'::public.product_source, 4, 3, 8, 'Frigo cuisine', 9),
-    ('3228021170046', 'Emmental râpé', 'PRÉSIDENT', 'https://images.openfoodfacts.org/images/products/322/802/117/0046/front_fr.154.400.jpg', 'Crèmerie', 'sachet'::public.product_unit, 'openfoodfacts'::public.product_source, 5, 4, 12, 'Frigo cuisine', 14),
+    ('3523230028431', 'La bûche Sainte-Maure (Poitou-Charentes', 'Soignon', 'https://images.openfoodfacts.org/images/products/352/323/002/8431/front_en.175.400.jpg', 'Crémerie', 'piece'::public.product_unit, 'openfoodfacts'::public.product_source, 4, 3, 8, 'Frigo cuisine', 9),
+    ('3228021170046', 'Emmental râpé', 'PRÉSIDENT', 'https://images.openfoodfacts.org/images/products/322/802/117/0046/front_fr.154.400.jpg', 'Crémerie', 'sachet'::public.product_unit, 'openfoodfacts'::public.product_source, 5, 4, 12, 'Frigo cuisine', 14),
     ('3181450100599', 'CHORIZO Doux', 'Cesar Moroni', 'https://images.openfoodfacts.org/images/products/318/145/010/0599/front_fr.55.400.jpg', 'Viande', 'piece'::public.product_unit, 'openfoodfacts'::public.product_source, 3, 2, 6, 'Frigo cuisine', 18),
     ('20437022', 'Salami', 'Dulano', 'https://images.openfoodfacts.org/images/products/000/002/043/7022/front_en.36.400.jpg', 'Viande', 'piece'::public.product_unit, 'openfoodfacts'::public.product_source, 2, 2, 6, 'Frigo cuisine', 21),
     ('3154230050667', 'HERTA allumettes de Bacon 2x100g - 200g', 'Herta', 'https://images.openfoodfacts.org/images/products/315/423/005/0667/front_fr.152.400.jpg', 'Viande', 'barquette'::public.product_unit, 'openfoodfacts'::public.product_source, 4, 3, 9, 'Frigo cuisine', 5),
@@ -90,7 +90,7 @@ begin
     ('3564700004524', 'Farine de blé T45', 'Marque Repère', 'https://images.openfoodfacts.org/images/products/356/470/000/4524/front_fr.64.400.jpg', 'Épicerie', 'sac'::public.product_unit, 'openfoodfacts'::public.product_source, 6, 4, 12, 'Réserve sèche', null),
     (null, 'Pâte à pizza (pâtons)', null, null, 'Mise en place', 'piece'::public.product_unit, 'manual'::public.product_source, 36, 20, 60, 'Frigo cuisine', 2),
     (null, 'Sauce tomate maison', null, null, 'Mise en place', 'l'::public.product_unit, 'manual'::public.product_source, 5, 4, 12, 'Frigo cuisine', 4),
-    (null, 'Mozzarella fior di latte', null, null, 'Crèmerie', 'kg'::public.product_unit, 'manual'::public.product_source, 4, 5, 12, 'Frigo cuisine', 3),
+    (null, 'Mozzarella fior di latte', null, null, 'Crémerie', 'kg'::public.product_unit, 'manual'::public.product_source, 4, 5, 12, 'Frigo cuisine', 3),
     (null, 'Basilic frais', null, null, 'Fruits & légumes', 'botte'::public.product_unit, 'manual'::public.product_source, 3, 4, 10, 'Frigo cuisine', 3),
     (null, 'Roquette', null, null, 'Fruits & légumes', 'sachet'::public.product_unit, 'manual'::public.product_source, 1, 3, 8, 'Frigo cuisine', 4),
     (null, 'Tomates cerises', null, null, 'Fruits & légumes', 'barquette'::public.product_unit, 'manual'::public.product_source, 6, 4, 12, 'Frigo cuisine', 5),
@@ -99,7 +99,7 @@ begin
     (null, 'Courgettes', null, null, 'Fruits & légumes', 'kg'::public.product_unit, 'manual'::public.product_source, 3, 2, 6, 'Frigo cuisine', 6),
     (null, 'Aubergines', null, null, 'Fruits & légumes', 'kg'::public.product_unit, 'manual'::public.product_source, 2, 2, 6, 'Frigo cuisine', 6),
     (null, 'Pommes de terre', null, null, 'Fruits & légumes', 'kg'::public.product_unit, 'manual'::public.product_source, 12, 8, 25, 'Réserve sèche', null),
-    (null, 'Œufs', null, null, 'Crèmerie', 'piece'::public.product_unit, 'manual'::public.product_source, 30, 24, 60, 'Frigo cuisine', 12),
+    (null, 'Œufs', null, null, 'Crémerie', 'piece'::public.product_unit, 'manual'::public.product_source, 30, 24, 60, 'Frigo cuisine', 12),
     (null, 'Origan sec', null, null, 'Épicerie', 'sachet'::public.product_unit, 'manual'::public.product_source, 2, 2, 6, 'Réserve sèche', null),
     (null, 'Sel fin', null, null, 'Épicerie', 'kg'::public.product_unit, 'manual'::public.product_source, 5, 3, 10, 'Réserve sèche', null),
     (null, 'Semoule de blé dur', null, null, 'Épicerie', 'kg'::public.product_unit, 'manual'::public.product_source, 3, 2, 8, 'Réserve sèche', null),

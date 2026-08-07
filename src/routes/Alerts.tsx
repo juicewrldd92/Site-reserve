@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { PlusIcon } from '@/components/icons'
 import { Card } from '@/components/ui/Card'
+import { Photo } from '@/components/ui/Photo'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { cn } from '@/components/ui/cn'
 import { useAlerts } from '@/features/alerts/useAlerts'
@@ -228,10 +229,6 @@ function LowRow({ item, onOpen }: { item: StockOverviewRow; onOpen: () => void }
 
 function Thumb({ item }: { item: StockOverviewRow }) {
   return (
-    <span className="photo-ph rounded-thumb h-14 w-14 flex-none overflow-hidden">
-      {item.image_url && (
-        <img src={item.image_url} alt="" loading="lazy" className="h-full w-full object-cover" />
-      )}
-    </span>
+    <Photo src={item.image_url} size={56} className="rounded-thumb h-14 w-14 flex-none" />
   )
 }

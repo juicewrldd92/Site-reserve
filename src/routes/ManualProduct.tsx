@@ -26,7 +26,7 @@ const CATEGORIES = [
   'Fruits & légumes',
   'Viande',
   'Poisson',
-  'Crèmerie',
+  'Crémerie',
   'Épicerie',
   'Boisson',
   'Surgelé',

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 
 import { CartIcon, ChevronRightIcon } from '@/components/icons'
 import { Card } from '@/components/ui/Card'
+import { Photo } from '@/components/ui/Photo'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { cn } from '@/components/ui/cn'
 import { useAlerts } from '@/features/alerts/useAlerts'
@@ -125,16 +126,11 @@ export function Dashboard() {
                 const badge = stockBadge(item, alertDays)
                 return (
                   <div key={item.id} className="flex items-center gap-3">
-                    <span className="photo-ph h-11 w-11 flex-none overflow-hidden rounded-[13px]">
-                      {item.image_url && (
-                        <img
-                          src={item.image_url}
-                          alt=""
-                          loading="lazy"
-                          className="h-full w-full object-cover"
-                        />
-                      )}
-                    </span>
+                    <Photo
+                      src={item.image_url}
+                      size={44}
+                      className="h-11 w-11 flex-none rounded-[13px]"
+                    />
                     <div className="flex min-w-0 flex-1 flex-col gap-px">
                       <span className="truncate text-[14px] font-bold">{item.name}</span>
                       <span

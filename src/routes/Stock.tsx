@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { MinusIcon, PlusIcon, SearchIcon, SlidersIcon } from '@/components/icons'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { Photo } from '@/components/ui/Photo'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { cn } from '@/components/ui/cn'
@@ -331,15 +332,8 @@ function StockTile({
       onClick={onOpen}
       className="bg-surface rounded-card shadow-card-lg overflow-hidden text-left"
     >
-      <div className="photo-ph relative h-[132px]">
-        {item.image_url && (
-          <img
-            src={item.image_url}
-            alt=""
-            loading="lazy"
-            className="h-full w-full object-cover"
-          />
-        )}
+      <div className="relative h-[132px]">
+        <Photo src={item.image_url} size={264} className="h-full w-full" />
         <StatusBadge tone={badge.tone} size="sm" className="absolute top-2 right-2">
           {badge.label}
         </StatusBadge>
