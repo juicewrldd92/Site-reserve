@@ -32,3 +32,6 @@ public/workbox-*.js
 *.njsproj
 *.sln
 *.sw?
+
+# Clés VAPID générées localement — la privée ne doit jamais être commitée
+vapid.json

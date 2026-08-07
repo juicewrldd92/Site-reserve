@@ -103,6 +103,17 @@ export type OrderListItemView = OrderListItemRow & {
   supplier_name: string | null
 }
 
+export type PushSubscriptionRow = {
+  id: string
+  user_id: string
+  establishment_id: string
+  endpoint: string
+  p256dh: string
+  auth: string
+  created_at: string
+  last_sent_at: string | null
+}
+
 export type ProductUnit =
   | 'piece'
   | 'kg'
@@ -255,6 +266,18 @@ export type Database = {
           unit: ProductUnit
         } & Partial<Omit<OrderListItemRow, 'order_list_id' | 'product_id' | 'unit'>>
         Update: Partial<OrderListItemRow>
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: PushSubscriptionRow
+        Insert: {
+          user_id: string
+          establishment_id: string
+          endpoint: string
+          p256dh: string
+          auth: string
+        } & Partial<Omit<PushSubscriptionRow, 'user_id' | 'establishment_id' | 'endpoint' | 'p256dh' | 'auth'>>
+        Update: Partial<PushSubscriptionRow>
         Relationships: []
       }
       invitations: {

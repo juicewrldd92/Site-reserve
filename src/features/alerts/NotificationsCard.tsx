@@ -1,10 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
 
 import { Card } from '@/components/ui/Card'
 import { cn } from '@/components/ui/cn'
 import { listStock, stockQueryKey } from '@/features/stock/stockRepository'
 import { useTenancy } from '@/features/tenancy/useTenancy'
 
+import { hasPushConfig, subscribeToPush, unsubscribeFromPush } from './pushSubscription'
 import { useNotifications } from './useNotifications'
 
 /** Réglage des notifications, avec ce qu'elles savent faire — et ce qu'elles ne savent pas. */
@@ -22,6 +24,30 @@ export function NotificationsCard() {
     stock.data ?? [],
     alertDays,
   )
+  const [pushError, setPushError] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+
+  async function toggle() {
+    setPushError(null)
+    setBusy(true)
+    try {
+      if (enabled) {
+        await unsubscribeFromPush()
+        disable()
+        return
+      }
+      const accepted = await enable()
+      // L'abonnement au serveur de push n'est possible qu'une fois
+      // l'autorisation accordée, et seulement si le déploiement est configuré.
+      if (accepted && hasPushConfig && current) {
+        await subscribeToPush(current.id)
+      }
+    } catch (cause) {
+      setPushError(cause instanceof Error ? cause.message : 'Abonnement impossible.')
+    } finally {
+      setBusy(false)
+    }
+  }
 
   return (
     <section className="flex flex-col gap-2.5">
@@ -68,7 +94,8 @@ export function NotificationsCard() {
                 role="switch"
                 aria-checked={enabled}
                 aria-label="Alerte de dates"
-                onClick={() => (enabled ? disable() : void enable())}
+                disabled={busy}
+                onClick={() => void toggle()}
                 className={cn(
                   'relative h-[30px] w-[50px] flex-none rounded-full transition-colors',
                   enabled ? 'bg-corail' : 'bg-line',
@@ -83,10 +110,16 @@ export function NotificationsCard() {
               </button>
             </div>
 
+            {pushError && (
+              <p className="bg-alert-bg text-alert-ink rounded-card px-3 py-2 text-[12.5px] font-semibold">
+                {pushError}
+              </p>
+            )}
+
             <p className="text-ink-muted text-[12.5px] leading-relaxed">
-              Réserve te prévient <strong>quand tu ouvres l'app</strong>. Être alerté
-              alors qu'elle est fermée demande un serveur d'envoi, qui n'est pas encore
-              en place.
+              {hasPushConfig
+                ? 'Un rappel quotidien le matin, même si l’app est fermée, plus un rappel à l’ouverture.'
+                : 'Réserve te prévient quand tu ouvres l’app. Le rappel quotidien à distance demande une configuration côté serveur.'}
             </p>
           </>
         )}

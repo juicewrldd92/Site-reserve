@@ -58,6 +58,9 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+        // Ajoute la réception des notifications au service worker généré,
+        // sans avoir à reprendre à la main toute la config de cache.
+        importScripts: ['/push-sw.js'],
         navigateFallback: '/index.html',
         cleanupOutdatedCaches: true,
         runtimeCaching: [
