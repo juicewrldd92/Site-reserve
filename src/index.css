@@ -99,6 +99,17 @@
   --animate-sweep: sweep 2.2s ease-in-out infinite alternate;
 }
 
+/* Jauge de progression de la visite guidée : remplit son conteneur en un
+   chapitre. Distincte de `sweep`, qui est la ligne du scanner. */
+@keyframes fill {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
 @keyframes pop {
   0% {
     transform: scale(0.86);

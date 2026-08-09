@@ -5,6 +5,8 @@ import { BrandMark, CheckIcon, ChevronRightIcon } from '@/components/icons'
 import { cn } from '@/components/ui/cn'
 
 import { PhoneFrame } from './landing/PhoneFrame'
+import { Showcase } from './landing/Showcase'
+import { Simulator } from './landing/Simulator'
 import { AlertScreen, OrderScreen, ScanScreen, StockScreen } from './landing/screens'
 
 /**
@@ -23,7 +25,9 @@ export function Landing() {
     <div className="bg-canvas text-ink font-sans">
       <TopBar />
       <Hero />
+      <Simulator />
       <Promises />
+      <Showcase />
       <Proof />
       <Module
         eyebrow="Le scan"
@@ -82,6 +86,15 @@ function TopBar() {
           </span>
         </span>
         <nav className="ml-auto flex items-center gap-6">
+          <a
+            href="#simulateur"
+            className="hidden text-[14px] font-semibold text-white/70 sm:block"
+          >
+            Ce que tu jettes
+          </a>
+          <a href="#app" className="hidden text-[14px] font-semibold text-white/70 sm:block">
+            L’app
+          </a>
           <a href="#tarif" className="hidden text-[14px] font-semibold text-white/70 sm:block">
             Tarif
           </a>
@@ -126,7 +139,15 @@ function Hero() {
               Essayer gratuitement
               <ChevronRightIcon size={18} />
             </Link>
-            <span className="text-[14px] text-white/45">30 jours, sans carte bancaire</span>
+            <a
+              href="#simulateur"
+              className="flex h-13 items-center rounded-full border border-white/20 px-6 text-[15.5px] font-semibold text-white/80"
+            >
+              Calculer ce que je jette
+            </a>
+          </div>
+          <div className="flex items-center gap-2 text-[14px] text-white/45">
+            15 jours d’essai, sans carte bancaire
           </div>
         </div>
 
