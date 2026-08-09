@@ -18,11 +18,24 @@ export type ProfileRow = {
   created_at: string
 }
 
+export type SubscriptionStatus =
+  | 'trialing'
+  | 'active'
+  | 'past_due'
+  | 'canceled'
+  | 'incomplete'
+
 export type OrganizationRow = {
   id: string
   name: string
   owner_id: string
   created_at: string
+  /** Fin de l'essai gratuit ; fait foi tant qu'aucun abonnement n'existe. */
+  trial_ends_at: string
+  subscription_status: SubscriptionStatus
+  stripe_customer_id: string | null
+  stripe_subscription_id: string | null
+  current_period_end: string | null
 }
 
 export type EstablishmentRow = {

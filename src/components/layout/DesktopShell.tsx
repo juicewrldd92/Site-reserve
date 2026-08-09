@@ -14,6 +14,7 @@ import { OfflineBanner } from '@/components/pwa/OfflineBanner'
 import { UpdateToast } from '@/components/pwa/UpdateToast'
 import { cn } from '@/components/ui/cn'
 import { useAlerts } from '@/features/alerts/useAlerts'
+import { TrialBanner } from '@/features/billing/TrialBanner'
 import { useProfile } from '@/features/profile/useProfile'
 import { EstablishmentSwitcher } from '@/features/tenancy/EstablishmentSwitcher'
 import { useStockRealtime } from '@/features/stock/useStockRealtime'
@@ -136,6 +137,9 @@ export function DesktopShell() {
         </header>
 
         <main className="min-h-0 flex-1 overflow-y-auto px-8 py-7">
+          <div className="pb-4 empty:hidden">
+            <TrialBanner />
+          </div>
           <Outlet />
         </main>
       </div>

@@ -1,5 +1,7 @@
 import { Outlet } from 'react-router-dom'
 
+import { TrialBanner } from '@/features/billing/TrialBanner'
+
 import { OfflineBanner } from '@/components/pwa/OfflineBanner'
 import { UpdateToast } from '@/components/pwa/UpdateToast'
 import { useAlerts } from '@/features/alerts/useAlerts'
@@ -37,6 +39,11 @@ function MobileShell() {
           className="min-h-0 flex-1 overflow-y-auto px-5 pb-4"
           style={{ paddingTop: 'max(env(safe-area-inset-top), 12px)' }}
         >
+          {/* Au-dessus du contenu et non en bandeau fixe : il doit se lire
+              une fois, pas coller à l'écran toute la journée. */}
+          <div className="pb-3 empty:hidden">
+            <TrialBanner />
+          </div>
           <Outlet />
         </main>
 

@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/Card'
 import { cn } from '@/components/ui/cn'
 import { ProfileSection } from '@/features/profile/ProfileSection'
 import { NotificationsCard } from '@/features/alerts/NotificationsCard'
+import { SubscriptionCard } from '@/features/billing/SubscriptionCard'
 import { MirrorPhotosCard } from '@/features/products/MirrorPhotosCard'
 import { EstablishmentPhoto } from '@/features/tenancy/EstablishmentPhoto'
 import { LocationsEditor } from '@/features/tenancy/LocationsEditor'
@@ -99,6 +100,8 @@ export function Settings() {
       </section>
 
       <MirrorPhotosCard />
+
+      <SubscriptionCard />
 
       <NotificationsCard />
 

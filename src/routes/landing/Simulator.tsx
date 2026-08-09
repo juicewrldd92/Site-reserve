@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 
 import { CheckIcon, ChevronRightIcon, CloseIcon } from '@/components/icons'
 import { cn } from '@/components/ui/cn'
+import { TRIAL_LABEL } from '@/lib/offer'
 
 import {
   COVER_OPTIONS,
@@ -245,7 +246,7 @@ function Result({
             to="/bienvenue"
             className="bg-corail shadow-corail flex h-12 items-center gap-2 rounded-full px-6 text-[15.5px] font-bold text-white"
           >
-            Essayer 15 jours gratuitement
+            Essayer {TRIAL_LABEL} gratuitement
             <ChevronRightIcon size={17} />
           </Link>
           <button
@@ -308,7 +309,7 @@ function InviteModal({
         </button>
 
         <span className="bg-corail-tint text-corail-ink self-start rounded-full px-3 py-1.5 text-[12px] font-bold">
-          15 jours offerts
+          {TRIAL_LABEL} offerts
         </span>
 
         <h3 className="text-[23px] leading-tight font-extrabold tracking-[-0.02em]">
@@ -319,7 +320,7 @@ function InviteModal({
 
         <p className="text-ink-muted text-[14.5px] leading-relaxed">
           Réserve suit tes dates lot par lot, te prévient avant que ça tourne, et calcule
-          tes commandes à ta place. Quinze jours pour voir si ça change quelque chose chez
+          tes commandes à ta place. Quatorze jours pour voir si ça change quelque chose chez
           toi.
         </p>
 

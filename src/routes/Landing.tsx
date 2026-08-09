@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 
 import { BrandMark, CheckIcon, ChevronRightIcon } from '@/components/icons'
 import { cn } from '@/components/ui/cn'
+import { PRICE_LABEL, TRIAL_LABEL } from '@/lib/offer'
 
 import { PhoneFrame } from './landing/PhoneFrame'
 import { Showcase } from './landing/Showcase'
@@ -147,7 +148,7 @@ function Hero() {
             </a>
           </div>
           <div className="flex items-center gap-2 text-[14px] text-white/45">
-            15 jours d’essai, sans carte bancaire
+            {TRIAL_LABEL} d’essai, sans carte bancaire
           </div>
         </div>
 
@@ -335,7 +336,9 @@ function Pricing() {
 
         <div className="bg-surface rounded-sheet shadow-card w-full max-w-sm px-8 py-9">
           <div className="flex items-baseline justify-center gap-1.5">
-            <span className="font-display text-[52px] leading-none font-semibold">19 €</span>
+            <span className="font-display text-[52px] leading-none font-semibold">
+              {PRICE_LABEL}
+            </span>
             <span className="text-ink-muted text-[15px] font-semibold">/ mois</span>
           </div>
           <p className="text-ink-muted pt-1.5 text-[13.5px]">par établissement</p>
@@ -361,7 +364,7 @@ function Pricing() {
             to="/bienvenue"
             className="bg-corail shadow-corail mt-8 flex h-13 items-center justify-center rounded-full text-[15.5px] font-bold text-white"
           >
-            Commencer les 30 jours
+            Commencer les {TRIAL_LABEL}
           </Link>
           <p className="text-ink-faint pt-3 text-[12.5px]">Sans carte bancaire, sans engagement</p>
         </div>
