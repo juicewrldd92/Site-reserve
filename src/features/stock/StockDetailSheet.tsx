@@ -3,10 +3,13 @@ import { useEffect, useRef, useState } from 'react'
 
 import { CalendarIcon, MinusIcon, PlusIcon } from '@/components/icons'
 import { BottomSheet } from '@/components/ui/BottomSheet'
+import { DecimalInput } from '@/components/ui/DecimalInput'
+import { clean as cleanDecimal } from '@/components/ui/decimal'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Select } from '@/components/ui/Select'
 import { cn } from '@/components/ui/cn'
+import { toast } from '@/components/ui/toast'
 import { productsQueryKey } from '@/features/products/productKeys'
 import { replaceProductImage } from '@/features/products/productRepository'
 import { UnitSelect } from '@/features/products/UnitSelect'
@@ -121,9 +124,12 @@ export function StockDetailSheet({
     onSuccess: refresh,
   })
 
+  const [confirming, setConfirming] = useState(false)
+
   const drop = useMutation({
     mutationFn: () => removeStockItem(item.id),
     onSuccess: async () => {
+      toast(`${item.name} retiré du stock`)
       await refresh()
       onClose()
     },
@@ -196,13 +202,9 @@ export function StockDetailSheet({
           <div className="flex flex-col gap-0.5">
             <span className="text-ink-muted text-[12.5px] font-semibold">Quantité</span>
             <div className="flex items-baseline gap-1.5">
-              <input
-                type="number"
-                inputMode="decimal"
-                min={0}
-                step="0.1"
+              <DecimalInput
                 value={quantity}
-                onChange={(e) => setQuantity(Math.max(0, Number(e.target.value)))}
+                onValueChange={(next) => setQuantity(Math.max(0, next))}
                 className="w-20 border-0 bg-transparent text-[19px] font-bold outline-none"
               />
               <span className="text-ink-muted text-[14px] font-semibold">
@@ -236,24 +238,22 @@ export function StockDetailSheet({
           <Card className="flex flex-col gap-1.5 px-4 py-3.5">
             <span className="text-ink-muted text-[12.5px] font-semibold">Stock mini</span>
             <input
-              type="number"
+              type="text"
               inputMode="decimal"
-              min={0}
               placeholder="—"
               value={threshold}
-              onChange={(e) => setThreshold(e.target.value)}
+              onChange={(e) => setThreshold(cleanDecimal(e.target.value))}
               className="placeholder:text-ink-faint w-full border-0 bg-transparent text-[15.5px] font-bold outline-none"
             />
           </Card>
           <Card className="flex flex-col gap-1.5 px-4 py-3.5">
             <span className="text-ink-muted text-[12.5px] font-semibold">Stock optimal</span>
             <input
-              type="number"
+              type="text"
               inputMode="decimal"
-              min={0}
               placeholder="—"
               value={target}
-              onChange={(e) => setTarget(e.target.value)}
+              onChange={(e) => setTarget(cleanDecimal(e.target.value))}
               className="placeholder:text-ink-faint w-full border-0 bg-transparent text-[15.5px] font-bold outline-none"
             />
           </Card>
@@ -311,11 +311,10 @@ export function StockDetailSheet({
 
           <Card className="flex items-center gap-2.5 px-4 py-3">
             <input
-              type="number"
-              min={0.1}
-              step="0.1"
+              type="text"
+              inputMode="decimal"
               value={newBatchQty}
-              onChange={(e) => setNewBatchQty(e.target.value)}
+              onChange={(e) => setNewBatchQty(cleanDecimal(e.target.value))}
               className="w-14 border-0 bg-transparent text-[15px] font-bold outline-none"
               aria-label="Quantité du lot"
             />
@@ -348,14 +347,45 @@ export function StockDetailSheet({
           <Button onClick={() => save.mutate()} disabled={save.isPending}>
             {save.isPending ? 'On enregistre…' : 'Enregistrer'}
           </Button>
-          <button
-            type="button"
-            onClick={() => drop.mutate()}
-            disabled={drop.isPending}
-            className={cn('text-ink-muted py-2 text-[14px] font-semibold')}
-          >
-            Retirer du stock
-          </button>
+          {confirming ? (
+            /*
+             * Confirmation sur place plutôt qu'une seconde feuille : on est
+             * déjà dans un panneau, en empiler un autre désoriente. La
+             * suppression groupée demande la même chose — un pouce qui glisse
+             * ne doit pas effacer un produit et ses dates.
+             */
+            <div className="bg-alert-bg rounded-card flex flex-col gap-2.5 px-4 py-3.5">
+              <span className="text-alert-ink text-[13.5px] leading-snug font-semibold">
+                Retirer « {item.name} » du stock, avec ses dates ? La fiche produit reste
+                au catalogue.
+              </span>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => drop.mutate()}
+                  disabled={drop.isPending}
+                  className="bg-alert flex-1 rounded-full py-2.5 text-[13.5px] font-bold text-white"
+                >
+                  {drop.isPending ? 'Suppression…' : 'Oui, retirer'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirming(false)}
+                  className="text-alert-ink flex-1 rounded-full py-2.5 text-[13.5px] font-bold"
+                >
+                  Garder
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setConfirming(true)}
+              className={cn('text-ink-muted py-2 text-[14px] font-semibold')}
+            >
+              Retirer du stock
+            </button>
+          )}
         </div>
       </div>
     </BottomSheet>

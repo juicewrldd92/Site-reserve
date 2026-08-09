@@ -208,7 +208,7 @@ export function Scan() {
         </div>
 
         {status === 'scanning' && (
-          <p className="text-center font-mono text-[11px] text-white/40">
+          <p className="text-center font-mono text-[11px] text-white/55">
             moteur : {engine === 'native' ? 'BarcodeDetector' : 'ZXing'}
           </p>
         )}

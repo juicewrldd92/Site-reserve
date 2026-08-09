@@ -24,6 +24,23 @@ export function BottomSheet({
     return () => window.removeEventListener('keydown', onKey)
   }, [open, onClose])
 
+  /*
+   * Fige la page derrière la feuille.
+   *
+   * Sans ça, un glissement dans la feuille fait défiler le contenu du dessous :
+   * deux couches bougent en même temps, et on perd sa place dans le stock en
+   * réglant un seuil. On restaure la valeur précédente plutôt que de forcer
+   * `visible`, pour ne rien casser si deux feuilles se superposent.
+   */
+  useEffect(() => {
+    if (!open) return
+    const previous = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previous
+    }
+  }, [open])
+
   if (!open) return null
 
   return (

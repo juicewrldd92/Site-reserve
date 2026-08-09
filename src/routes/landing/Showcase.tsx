@@ -134,7 +134,7 @@ export function Showcase() {
               <button
                 type="button"
                 onClick={() => setAuto(true)}
-                className="self-start text-[13px] font-semibold text-white/40 underline"
+                className="self-start text-[13px] font-semibold text-white/55 underline"
               >
                 Relancer la visite
               </button>

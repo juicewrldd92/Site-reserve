@@ -15,7 +15,7 @@ import { useTenancy } from '@/features/tenancy/useTenancy'
 export function Home() {
   const { displayName } = useProfile()
   const { current } = useTenancy()
-  const { groups } = useAlerts()
+  const { groups, isLoading } = useAlerts()
 
   const alertDays = current?.dlc_alert_days ?? 5
   // Les 3 lignes les plus urgentes, tous groupes confondus.
@@ -31,7 +31,7 @@ export function Home() {
           className="bg-surface shadow-pill relative flex h-11 w-11 items-center justify-center rounded-full"
         >
           <BellIcon size={21} strokeWidth={1.6} />
-          {groups.total > 0 && (
+          {!isLoading && groups.total > 0 && (
             <span className="bg-alert absolute top-2.5 right-3 h-2 w-2 rounded-full border-2 border-white" />
           )}
         </Link>
@@ -49,12 +49,14 @@ export function Home() {
           tint="bg-warn-bg"
           dot="bg-warn"
           value={groups.low.length}
+          loading={isLoading}
           label="en stock bas"
         />
         <StatCard
           tint="bg-alert-bg"
           dot="bg-alert"
           value={groups.expired.length + groups.expiring.length}
+          loading={isLoading}
           label={`DLC sous ${alertDays} j`}
         />
       </div>
@@ -136,18 +138,31 @@ function StatCard({
   dot,
   value,
   label,
+  loading = false,
 }: {
   tint: string
   dot: string
   value: number
   label: string
+  loading?: boolean
 }) {
   return (
     <Card className="flex flex-col gap-[7px] p-4">
       <span className={`flex h-8 w-8 items-center justify-center rounded-[11px] ${tint}`}>
         <span className={`h-[9px] w-[9px] rounded-full ${dot}`} />
       </span>
-      <span className="text-[30px] leading-none font-extrabold tracking-[-0.03em]">{value}</span>
+      {loading ? (
+        // Un « 0 » affiché pendant le chargement se lit « tout va bien » — le
+        // pire malentendu possible pour une app dont c'est toute la promesse.
+        <span
+          aria-hidden
+          className="bg-canvas-warm my-[3px] h-[24px] w-10 animate-pulse rounded-lg"
+        />
+      ) : (
+        <span className="text-[30px] leading-none font-extrabold tracking-[-0.03em]">
+          {value}
+        </span>
+      )}
       <span className="text-ink-muted text-[13.5px] font-semibold">{label}</span>
     </Card>
   )

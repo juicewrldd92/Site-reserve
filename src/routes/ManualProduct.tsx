@@ -11,6 +11,7 @@ import {
 } from '@/components/icons'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { toast } from '@/components/ui/toast'
 import { Chip } from '@/components/ui/Chip'
 import { Field, FieldGroup } from '@/components/ui/Field'
 import { productsQueryKey } from '@/features/products/productKeys'
@@ -107,6 +108,7 @@ export function ManualProduct() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: productsQueryKey })
       await queryClient.invalidateQueries({ queryKey: stockQueryKey })
+      toast(`${name.trim()} ajouté au stock`)
       navigate('/stock', { replace: true })
     },
   })

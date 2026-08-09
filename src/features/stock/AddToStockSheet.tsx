@@ -5,6 +5,8 @@ import { CalendarIcon, MinusIcon, PlusIcon } from '@/components/icons'
 import { BottomSheet } from '@/components/ui/BottomSheet'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { toast } from '@/components/ui/toast'
+import { clean as cleanDecimal } from '@/components/ui/decimal'
 import { cn } from '@/components/ui/cn'
 import { UnitSelect } from '@/features/products/UnitSelect'
 import { unitLabel } from '@/features/products/units'
@@ -62,6 +64,8 @@ export function AddToStockSheet({
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: stockQueryKey })
+      // La feuille se ferme : sans un mot, rien ne dit que c'est parti.
+      toast(`${product.name} ajouté au stock`)
       onAdded?.()
       onClose()
     },
@@ -122,24 +126,22 @@ export function AddToStockSheet({
           <Card className="flex flex-col gap-1.5 px-4 py-3.5">
             <span className="text-ink-muted text-[12.5px] font-semibold">Stock mini</span>
             <input
-              type="number"
+              type="text"
               inputMode="decimal"
-              min={0}
               placeholder="—"
               value={threshold}
-              onChange={(e) => setThreshold(e.target.value)}
+              onChange={(e) => setThreshold(cleanDecimal(e.target.value))}
               className="placeholder:text-ink-faint w-full border-0 bg-transparent text-[15.5px] font-bold outline-none"
             />
           </Card>
           <Card className="flex flex-col gap-1.5 px-4 py-3.5">
             <span className="text-ink-muted text-[12.5px] font-semibold">Stock optimal</span>
             <input
-              type="number"
+              type="text"
               inputMode="decimal"
-              min={0}
               placeholder="—"
               value={target}
-              onChange={(e) => setTarget(e.target.value)}
+              onChange={(e) => setTarget(cleanDecimal(e.target.value))}
               className="placeholder:text-ink-faint w-full border-0 bg-transparent text-[15.5px] font-bold outline-none"
             />
           </Card>

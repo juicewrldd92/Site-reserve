@@ -124,9 +124,11 @@ function Hero() {
       <div className="relative mx-auto flex max-w-6xl flex-col items-center gap-12 px-6 py-20 lg:flex-row lg:py-28">
         <div className="flex flex-1 flex-col gap-6 xl:min-w-[38rem]">
           <h1 className="font-display text-[32px] leading-[1.08] font-semibold tracking-[-0.02em] text-white sm:text-[46px] xl:text-[56px]">
-            Ta réserve mérite mieux
+            {/* Insécable : « mérite mieux » ne doit pas se couper, sinon
+                « mieux » se retrouve seul sur sa ligne en 375 px. */}
+            Ta réserve mérite&nbsp;mieux
             <br />
-            qu’un carnet à spirale
+            qu’un carnet à&nbsp;spirale
           </h1>
           <p className="text-[17px] leading-relaxed text-white/65">
             Pour les restaurants indépendants fatigués de commander au pif, de jeter ce

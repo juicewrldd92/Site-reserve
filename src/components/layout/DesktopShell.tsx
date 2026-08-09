@@ -12,6 +12,7 @@ import {
 } from '@/components/icons'
 import { OfflineBanner } from '@/components/pwa/OfflineBanner'
 import { UpdateToast } from '@/components/pwa/UpdateToast'
+import { Toaster } from '@/components/ui/Toaster'
 import { cn } from '@/components/ui/cn'
 import { useAlerts } from '@/features/alerts/useAlerts'
 import { TrialBanner } from '@/features/billing/TrialBanner'
@@ -42,7 +43,7 @@ const NAV: readonly NavEntry[] = [
  */
 export function DesktopShell() {
   const navigate = useNavigate()
-  const { groups } = useAlerts()
+  const { groups, isLoading: alertsLoading } = useAlerts()
   const { displayName, avatarUrl } = useProfile()
   useStockRealtime()
 
@@ -74,7 +75,7 @@ export function DesktopShell() {
             >
               <Icon size={19} />
               {label}
-              {to === '/alertes' && groups.total > 0 && (
+              {to === '/alertes' && !alertsLoading && groups.total > 0 && (
                 <span className="bg-alert ml-auto flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-bold text-white">
                   {groups.total}
                 </span>
@@ -145,6 +146,7 @@ export function DesktopShell() {
       </div>
 
       <UpdateToast />
+      <Toaster />
     </div>
   )
 }

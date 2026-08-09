@@ -24,7 +24,7 @@ import type { StockOverviewRow } from '@/lib/database.types'
 export function Dashboard() {
   const { displayName } = useProfile()
   const { current } = useTenancy()
-  const { groups } = useAlerts()
+  const { groups, isLoading: alertsLoading } = useAlerts()
 
   const alertDays = current?.dlc_alert_days ?? 5
 
@@ -64,11 +64,17 @@ export function Dashboard() {
       </header>
 
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        <Kpi label="Produits en stock" value={items.length} hint="au total" />
+        <Kpi
+          label="Produits en stock"
+          value={items.length}
+          hint="au total"
+          loading={stock.isPending}
+        />
         <Kpi
           label="Stock bas"
           value={groups.low.length}
           hint="à commander"
+          loading={alertsLoading}
           accent="border-t-warn"
           hintTone="text-warn-ink"
         />
@@ -76,6 +82,7 @@ export function Dashboard() {
           label={`DLC sous ${alertDays} j`}
           value={groups.expired.length + groups.expiring.length}
           hint={groups.expired.length > 0 ? `dont ${groups.expired.length} périmé(s)` : 'à surveiller'}
+          loading={alertsLoading}
           accent="border-t-alert"
           hintTone="text-alert-ink"
         />
@@ -83,6 +90,7 @@ export function Dashboard() {
           label="Commandes en cours"
           value={openOrders.length}
           hint={openOrders.length === 0 ? 'rien en attente' : 'à suivre'}
+          loading={orders.isPending}
         />
       </div>
 
@@ -217,19 +225,30 @@ function Kpi({
   hint,
   accent,
   hintTone = 'text-ink-muted',
+  loading = false,
 }: {
   label: string
   value: number
   hint: string
   accent?: string
   hintTone?: string
+  loading?: boolean
 }) {
   return (
     <Card className={cn('flex flex-col gap-2 p-5', accent && `border-t-4 ${accent}`)}>
       <span className="text-ink-muted text-[13.5px] font-semibold">{label}</span>
-      <span className="text-[34px] leading-none font-extrabold tracking-[-0.03em]">
-        {value}
-      </span>
+      {loading ? (
+        // Voir `StatCard` : un zéro affiché avant les données se lit « rien à
+        // signaler », ce qui est exactement l'inverse du service rendu.
+        <span
+          aria-hidden
+          className="bg-canvas-warm my-1 h-[26px] w-12 animate-pulse rounded-lg"
+        />
+      ) : (
+        <span className="text-[34px] leading-none font-extrabold tracking-[-0.03em]">
+          {value}
+        </span>
+      )}
       <span className={cn('text-[12.5px] font-semibold', hintTone)}>{hint}</span>
     </Card>
   )

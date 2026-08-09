@@ -18,6 +18,7 @@ import { Photo } from '@/components/ui/Photo'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { cn } from '@/components/ui/cn'
+import { toast } from '@/components/ui/toast'
 import { formatQuantity, unitLabel } from '@/features/products/units'
 import { PresetsSheet } from '@/features/stock/PresetsSheet'
 import { StockDetailSheet } from '@/features/stock/StockDetailSheet'
@@ -84,7 +85,8 @@ export function Stock() {
 
   const remove = useMutation({
     mutationFn: (ids: readonly string[]) => removeStockItems(ids),
-    onSuccess: async () => {
+    onSuccess: async (count) => {
+      toast(`${count} produit${count > 1 ? 's' : ''} retiré${count > 1 ? 's' : ''}`)
       setPicked(null)
       setConfirming(false)
       await queryClient.invalidateQueries({ queryKey: stockQueryKey })
@@ -183,13 +185,16 @@ export function Stock() {
               {stock.data?.length ?? 0} produit{(stock.data?.length ?? 0) > 1 ? 's' : ''}
             </span>
           )}
-          <button
-            type="button"
-            onClick={() => setPicked(selecting ? null : new Set())}
-            className="text-ink-muted text-[13.5px] font-semibold underline"
-          >
-            {selecting ? 'Annuler' : 'Sélectionner'}
-          </button>
+          {/* Un bouton qui ne peut rien faire ne s'affiche pas. */}
+          {(selecting || visible.length > 0) && (
+            <button
+              type="button"
+              onClick={() => setPicked(selecting ? null : new Set())}
+              className="text-ink-muted text-[13.5px] font-semibold underline"
+            >
+              {selecting ? 'Annuler' : 'Sélectionner'}
+            </button>
+          )}
         </div>
       </div>
 
@@ -439,7 +444,7 @@ function SelectionBar({
           disabled={count === 0}
           className={cn(
             'flex items-center gap-1.5 rounded-full px-4 py-2 text-[13.5px] font-bold transition-colors',
-            count === 0 ? 'bg-white/15 text-white/40' : 'bg-corail text-white',
+            count === 0 ? 'bg-white/15 text-white/55' : 'bg-corail text-white',
           )}
         >
           <TrashIcon size={16} />

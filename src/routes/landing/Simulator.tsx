@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { CheckIcon, ChevronRightIcon, CloseIcon } from '@/components/icons'
@@ -29,6 +29,7 @@ import {
  */
 export function Simulator() {
   const [step, setStep] = useState(0)
+  const card = useRef<HTMLDivElement>(null)
   const [answers, setAnswers] = useState<Partial<Answers>>({})
   const [showInvite, setShowInvite] = useState(false)
 
@@ -91,6 +92,19 @@ export function Simulator() {
     setAnswers((previous) => ({ ...previous, [key]: value }))
     // Passage automatique : une question répondue est une question finie.
     setStep((previous) => previous + 1)
+
+    /*
+     * Remonte la carte en haut de l'écran.
+     *
+     * Sans ça, sur téléphone, les huit types de resto s'empilent : on répond
+     * en bas de liste et la question suivante s'affiche au-dessus du champ de
+     * vision — on voit quatre boutons sans savoir ce qu'ils répondent.
+     *
+     * Ici plutôt que dans un effet : on sait exactement quand une question
+     * vient d'être répondue, et rien au-dessus de la carte ne bouge, donc sa
+     * position est déjà la bonne avant même le nouveau rendu.
+     */
+    card.current?.scrollIntoView({ block: 'start' })
     if (step === questions.length - 1) {
       // Laisse le résultat s'afficher avant de le recouvrir d'une invitation.
       setTimeout(() => setShowInvite(true), 2200)
@@ -123,7 +137,10 @@ export function Simulator() {
           </p>
         </div>
 
-        <div className="bg-surface rounded-card shadow-card-lg relative overflow-hidden">
+        <div
+          ref={card}
+          className="bg-surface rounded-card shadow-card-lg relative scroll-mt-20 overflow-hidden"
+        >
           {!done && current ? (
             <div className="flex flex-col gap-6 p-6 sm:p-9">
               <div className="flex flex-col gap-3">

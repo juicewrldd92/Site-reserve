@@ -4,6 +4,7 @@ import { TrialBanner } from '@/features/billing/TrialBanner'
 
 import { OfflineBanner } from '@/components/pwa/OfflineBanner'
 import { UpdateToast } from '@/components/pwa/UpdateToast'
+import { Toaster } from '@/components/ui/Toaster'
 import { useAlerts } from '@/features/alerts/useAlerts'
 import { useStockRealtime } from '@/features/stock/useStockRealtime'
 import { useIsDesktop } from '@/hooks/useIsDesktop'
@@ -25,7 +26,7 @@ export function AppShell() {
 }
 
 function MobileShell() {
-  const { groups } = useAlerts()
+  const { groups, isLoading: alertsLoading } = useAlerts()
   useStockRealtime()
 
   return (
@@ -47,8 +48,9 @@ function MobileShell() {
           <Outlet />
         </main>
 
-        <BottomNav alertCount={groups.total} />
+        <BottomNav alertCount={alertsLoading ? 0 : groups.total} />
         <UpdateToast />
+        <Toaster />
       </div>
     </div>
   )

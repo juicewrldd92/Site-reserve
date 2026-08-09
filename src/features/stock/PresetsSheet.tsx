@@ -5,6 +5,7 @@ import { CheckIcon, PlusIcon, TrashIcon } from '@/components/icons'
 import { BottomSheet } from '@/components/ui/BottomSheet'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { DecimalInput } from '@/components/ui/DecimalInput'
 import { Field, FieldGroup } from '@/components/ui/Field'
 import { Chip } from '@/components/ui/Chip'
 import { cn } from '@/components/ui/cn'
@@ -358,15 +359,16 @@ function PresetEditor({
         ))}
       </div>
 
-      <Field
-        label="Quantité par défaut"
-        type="number"
-        inputMode="decimal"
-        min={0.1}
-        step={0.1}
-        value={quantity}
-        onChange={(e) => setQuantity(Number(e.target.value))}
-      />
+      <label className="bg-surface rounded-card shadow-card flex flex-col gap-1.5 px-[18px] py-4">
+        <span className="text-ink-muted text-[12.5px] font-semibold">
+          Quantité par défaut
+        </span>
+        <DecimalInput
+          value={quantity}
+          onValueChange={setQuantity}
+          className="w-full border-0 bg-transparent text-[15px] outline-none"
+        />
+      </label>
 
       <UnitSelect value={unit} onChange={setUnit} />
 
