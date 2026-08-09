@@ -140,3 +140,24 @@ export async function removeBatch(batchId: string): Promise<void> {
   const { error } = await getSupabase().from('stock_batches').delete().eq('id', batchId)
   if (error) throw new Error(error.message)
 }
+
+/**
+ * Retire plusieurs lignes de stock d'un coup.
+ *
+ * Les lots datés partent avec, par cascade. Le produit reste au catalogue :
+ * on retire du stock, on ne supprime pas la fiche — elle resservira au
+ * prochain réassort.
+ *
+ * @returns le nombre de lignes retirées.
+ */
+export async function removeStockItems(ids: readonly string[]): Promise<number> {
+  if (ids.length === 0) return 0
+
+  const { error } = await getSupabase()
+    .from('stock_items')
+    .delete()
+    .in('id', ids as string[])
+  if (error) throw new Error(error.message)
+
+  return ids.length
+}

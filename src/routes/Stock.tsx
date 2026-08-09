@@ -2,7 +2,15 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { type ReactNode, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { MinusIcon, PlusIcon, SearchIcon, SlidersIcon } from '@/components/icons'
+import {
+  CheckIcon,
+  MinusIcon,
+  PlusIcon,
+  SearchIcon,
+  SlidersIcon,
+  TrashIcon,
+} from '@/components/icons'
+import { BottomSheet } from '@/components/ui/BottomSheet'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Photo } from '@/components/ui/Photo'
@@ -12,7 +20,12 @@ import { cn } from '@/components/ui/cn'
 import { formatQuantity, unitLabel } from '@/features/products/units'
 import { StockDetailSheet } from '@/features/stock/StockDetailSheet'
 import { daysUntil, stockBadge, stockStatus } from '@/features/stock/status'
-import { listStock, setQuantity, stockQueryKey } from '@/features/stock/stockRepository'
+import {
+  listStock,
+  removeStockItems,
+  setQuantity,
+  stockQueryKey,
+} from '@/features/stock/stockRepository'
 import { useTenancy } from '@/features/tenancy/useTenancy'
 import type { StockOverviewRow } from '@/lib/database.types'
 
@@ -49,13 +62,39 @@ export function Stock() {
   const [mode, setMode] = useState<Mode>('grid')
   const [selected, setSelected] = useState<StockOverviewRow | null>(null)
 
+  /**
+   * Sélection multiple. `null` = mode désactivé : tant qu'on n'a rien demandé,
+   * un tap sur un produit ouvre sa fiche, comme avant.
+   */
+  const [picked, setPicked] = useState<ReadonlySet<string> | null>(null)
+  const [confirming, setConfirming] = useState(false)
+  const selecting = picked !== null
+
   const alertDays = current?.dlc_alert_days ?? 5
+  const queryClient = useQueryClient()
 
   const stock = useQuery({
     queryKey: [...stockQueryKey, current?.id],
     queryFn: () => listStock(current?.id as string),
     enabled: Boolean(current?.id),
   })
+
+  const remove = useMutation({
+    mutationFn: (ids: readonly string[]) => removeStockItems(ids),
+    onSuccess: async () => {
+      setPicked(null)
+      setConfirming(false)
+      await queryClient.invalidateQueries({ queryKey: stockQueryKey })
+    },
+  })
+
+  function toggle(id: string) {
+    setPicked((current) => {
+      const next = new Set(current ?? [])
+      if (!next.delete(id)) next.add(id)
+      return next
+    })
+  }
 
   const visible = useMemo(() => {
     const all = stock.data ?? []
@@ -133,11 +172,22 @@ export function Stock() {
 
   return (
     <div className="flex min-h-full flex-col gap-3.5">
-      <div className="flex items-baseline justify-between">
+      <div className="flex items-baseline justify-between gap-3">
         <h1 className="text-[27px] font-extrabold tracking-[-0.03em]">Mon stock</h1>
-        <span className="text-ink-muted text-[13.5px] font-semibold">
-          {stock.data?.length ?? 0} produit{(stock.data?.length ?? 0) > 1 ? 's' : ''}
-        </span>
+        <div className="flex flex-none items-baseline gap-3">
+          {!selecting && (
+            <span className="text-ink-muted text-[13.5px] font-semibold">
+              {stock.data?.length ?? 0} produit{(stock.data?.length ?? 0) > 1 ? 's' : ''}
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={() => setPicked(selecting ? null : new Set())}
+            className="text-ink-muted text-[13.5px] font-semibold underline"
+          >
+            {selecting ? 'Annuler' : 'Sélectionner'}
+          </button>
+        </div>
       </div>
 
       <label className="bg-surface shadow-card flex items-center gap-2.5 rounded-full px-[18px] py-3">
@@ -238,14 +288,20 @@ export function Stock() {
               key={item.id}
               item={item}
               alertDays={alertDays}
-              onOpen={() => setSelected(item)}
+              picked={selecting ? (picked?.has(item.id) ?? false) : null}
+              onOpen={() => (selecting ? toggle(item.id) : setSelected(item))}
             />
           ))}
         </div>
       ) : (
         <div className="flex flex-col gap-2.5">
           {visible.map((item) => (
-            <InventoryRow key={item.id} item={item} onOpen={() => setSelected(item)} />
+            <InventoryRow
+              key={item.id}
+              item={item}
+              picked={selecting ? (picked?.has(item.id) ?? false) : null}
+              onOpen={() => (selecting ? toggle(item.id) : setSelected(item))}
+            />
           ))}
         </div>
       )}
@@ -256,7 +312,57 @@ export function Stock() {
         </p>
       )}
 
-      <div className="pb-2" />
+      {/* Laisse la place à la barre d'action pour ne pas masquer le dernier produit. */}
+      <div className={selecting ? 'pb-20' : 'pb-2'} />
+
+      {selecting && (
+        <SelectionBar
+          count={picked?.size ?? 0}
+          total={visible.length}
+          onSelectAll={() => setPicked(new Set(visible.map((item) => item.id)))}
+          onClear={() => setPicked(new Set())}
+          onDelete={() => setConfirming(true)}
+        />
+      )}
+
+      <BottomSheet
+        open={confirming}
+        onClose={() => setConfirming(false)}
+        title="Retirer du stock"
+      >
+        <div className="flex flex-col gap-3.5 px-5 pt-1 pb-6">
+          <p className="text-[14.5px] leading-relaxed">
+            {picked?.size === 1
+              ? 'Ce produit sera retiré de ton stock, avec ses dates.'
+              : `Ces ${picked?.size ?? 0} produits seront retirés de ton stock, avec leurs dates.`}{' '}
+            <span className="text-ink-muted">
+              Leur fiche reste au catalogue : tu pourras les rajouter au prochain réassort.
+            </span>
+          </p>
+
+          {remove.isError && (
+            <p className="bg-alert-bg text-alert-ink rounded-card px-4 py-3 text-[13.5px] font-semibold">
+              {remove.error.message}
+            </p>
+          )}
+
+          <Button
+            onClick={() => remove.mutate([...(picked ?? [])])}
+            disabled={remove.isPending}
+          >
+            {remove.isPending
+              ? 'Suppression…'
+              : `Retirer ${picked?.size ?? 0} produit${(picked?.size ?? 0) > 1 ? 's' : ''}`}
+          </Button>
+          <button
+            type="button"
+            onClick={() => setConfirming(false)}
+            className="text-ink-muted py-1 text-[14px] font-semibold"
+          >
+            Garder
+          </button>
+        </div>
+      </BottomSheet>
 
       {selected && (
         <StockDetailSheet
@@ -267,6 +373,74 @@ export function Stock() {
         />
       )}
     </div>
+  )
+}
+
+/**
+ * Barre d'action de la sélection.
+ *
+ * Fixée en bas, au-dessus de la navigation : le pouce y arrive sans remonter
+ * l'écran, même après avoir coché trente produits.
+ */
+function SelectionBar({
+  count,
+  total,
+  onSelectAll,
+  onClear,
+  onDelete,
+}: {
+  count: number
+  total: number
+  onSelectAll: () => void
+  onClear: () => void
+  onDelete: () => void
+}) {
+  const all = count > 0 && count === total
+
+  return (
+    <div className="pointer-events-none sticky bottom-2 z-30 flex justify-center">
+      <div className="bg-ink shadow-card-lg pointer-events-auto flex items-center gap-3 rounded-full py-2.5 pr-2.5 pl-5 text-white">
+        <span className="text-[13.5px] font-bold whitespace-nowrap">
+          {count === 0 ? 'Rien de coché' : `${count} sélectionné${count > 1 ? 's' : ''}`}
+        </span>
+
+        <button
+          type="button"
+          onClick={all ? onClear : onSelectAll}
+          className="text-[13px] font-semibold whitespace-nowrap text-white/70 underline"
+        >
+          {all ? 'Tout décocher' : 'Tout cocher'}
+        </button>
+
+        <button
+          type="button"
+          onClick={onDelete}
+          disabled={count === 0}
+          className={cn(
+            'flex items-center gap-1.5 rounded-full px-4 py-2 text-[13.5px] font-bold transition-colors',
+            count === 0 ? 'bg-white/15 text-white/40' : 'bg-corail text-white',
+          )}
+        >
+          <TrashIcon size={16} />
+          Retirer
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/** Pastille de sélection, en surimpression sur la photo ou en tête de ligne. */
+function PickMark({ picked }: { picked: boolean }) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        'flex h-[26px] w-[26px] flex-none items-center justify-center rounded-full border-2 transition-colors',
+        picked ? 'bg-corail border-corail text-white' : 'border-white/70 bg-black/25 text-transparent',
+      )}
+    >
+      <CheckIcon size={15} />
+    </span>
   )
 }
 
@@ -319,10 +493,13 @@ function ModeChip({
 function StockTile({
   item,
   alertDays,
+  /** `null` hors mode sélection : la tuile se comporte comme avant. */
+  picked,
   onOpen,
 }: {
   item: StockOverviewRow
   alertDays: number
+  picked: boolean | null
   onOpen: () => void
 }) {
   const badge = stockBadge(item, alertDays)
@@ -330,10 +507,19 @@ function StockTile({
     <button
       type="button"
       onClick={onOpen}
-      className="bg-surface rounded-card shadow-card-lg overflow-hidden text-left"
+      aria-pressed={picked ?? undefined}
+      className={cn(
+        'bg-surface rounded-card shadow-card-lg overflow-hidden text-left transition-shadow',
+        picked === true && 'ring-corail ring-2',
+      )}
     >
       <div className="relative h-[132px]">
         <Photo src={item.image_url} size={264} className="h-full w-full" />
+        {picked !== null && (
+          <span className="absolute top-2 left-2">
+            <PickMark picked={picked} />
+          </span>
+        )}
         <StatusBadge tone={badge.tone} size="sm" className="absolute top-2 right-2">
           {badge.label}
         </StatusBadge>
@@ -355,7 +541,15 @@ function StockTile({
  * Chaque tap part directement en base — pas de « valider » à la fin qu'on
  * oublierait de presser.
  */
-function InventoryRow({ item, onOpen }: { item: StockOverviewRow; onOpen: () => void }) {
+function InventoryRow({
+  item,
+  picked,
+  onOpen,
+}: {
+  item: StockOverviewRow
+  picked: boolean | null
+  onOpen: () => void
+}) {
   const queryClient = useQueryClient()
   const [draft, setDraft] = useState(item.quantity)
 
@@ -377,9 +571,16 @@ function InventoryRow({ item, onOpen }: { item: StockOverviewRow; onOpen: () => 
       className={cn(
         'flex items-center gap-3 p-2.5',
         status === 'expired' && 'border-alert border-l-4',
+        picked === true && 'ring-corail ring-2',
       )}
     >
-      <button type="button" onClick={onOpen} className="flex flex-1 items-center gap-3 text-left">
+      <button
+        type="button"
+        onClick={onOpen}
+        aria-pressed={picked ?? undefined}
+        className="flex flex-1 items-center gap-3 text-left"
+      >
+        {picked !== null && <PickMark picked={picked} />}
         <span className="photo-ph rounded-thumb h-14 w-14 flex-none overflow-hidden">
           {item.image_url && (
             <img src={item.image_url} alt="" className="h-full w-full object-cover" />
@@ -393,7 +594,14 @@ function InventoryRow({ item, onOpen }: { item: StockOverviewRow; onOpen: () => 
         </span>
       </button>
 
-      <div className="flex flex-none items-center gap-2.5">
+      <div
+        className={cn(
+          'flex flex-none items-center gap-2.5',
+          // En sélection, les boutons de quantité gêneraient plus qu'ils
+          // n'aideraient : un tap doit cocher, pas décrémenter.
+          picked !== null && 'hidden',
+        )}
+      >
         <button
           type="button"
           aria-label={`Retirer un ${item.name}`}

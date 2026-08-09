@@ -115,6 +115,12 @@ export const UploadIcon = makeIcon(18, <path d="M9 3v12M3.5 8.5 9 3l5.5 5.5" />,
 
 export const DownloadIcon = makeIcon(18, <path d="M9 15V3M3.5 9.5 9 15l5.5-5.5" />, 2)
 
+export const TrashIcon = makeIcon(
+  18,
+  <path d="M3 5.5h12M7.5 5.5V3.5h3v2M4.5 5.5 5.3 15h7.4l.8-9.5M7.5 8v4.5M10.5 8v4.5" />,
+  1.7,
+)
+
 export const OfflineIcon = makeIcon(
   22,
   <>
