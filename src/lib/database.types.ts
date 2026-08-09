@@ -103,6 +103,28 @@ export type OrderListItemView = OrderListItemRow & {
   supplier_name: string | null
 }
 
+export type StockPresetRow = {
+  id: string
+  establishment_id: string
+  name: string
+  created_by: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type StockPresetItemRow = {
+  id: string
+  preset_id: string
+  product_id: string | null
+  label: string | null
+  barcode: string | null
+  quantity: number
+  unit: ProductUnit
+  location: string
+  position: number
+  created_at: string
+}
+
 export type PushSubscriptionRow = {
   id: string
   user_id: string
@@ -266,6 +288,18 @@ export type Database = {
           unit: ProductUnit
         } & Partial<Omit<OrderListItemRow, 'order_list_id' | 'product_id' | 'unit'>>
         Update: Partial<OrderListItemRow>
+        Relationships: []
+      }
+      stock_presets: {
+        Row: StockPresetRow
+        Insert: { establishment_id: string; name: string } & Partial<StockPresetRow>
+        Update: Partial<StockPresetRow>
+        Relationships: []
+      }
+      stock_preset_items: {
+        Row: StockPresetItemRow
+        Insert: { preset_id: string } & Partial<StockPresetItemRow>
+        Update: Partial<StockPresetItemRow>
         Relationships: []
       }
       push_subscriptions: {

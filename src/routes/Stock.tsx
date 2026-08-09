@@ -7,6 +7,7 @@ import {
   MinusIcon,
   PlusIcon,
   SearchIcon,
+  ListIcon,
   SlidersIcon,
   TrashIcon,
 } from '@/components/icons'
@@ -18,6 +19,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { cn } from '@/components/ui/cn'
 import { formatQuantity, unitLabel } from '@/features/products/units'
+import { PresetsSheet } from '@/features/stock/PresetsSheet'
 import { StockDetailSheet } from '@/features/stock/StockDetailSheet'
 import { daysUntil, stockBadge, stockStatus } from '@/features/stock/status'
 import {
@@ -68,6 +70,7 @@ export function Stock() {
    */
   const [picked, setPicked] = useState<ReadonlySet<string> | null>(null)
   const [confirming, setConfirming] = useState(false)
+  const [presetsOpen, setPresetsOpen] = useState(false)
   const selecting = picked !== null
 
   const alertDays = current?.dlc_alert_days ?? 5
@@ -89,8 +92,8 @@ export function Stock() {
   })
 
   function toggle(id: string) {
-    setPicked((current) => {
-      const next = new Set(current ?? [])
+    setPicked((previous) => {
+      const next = new Set(previous ?? [])
       if (!next.delete(id)) next.add(id)
       return next
     })
@@ -273,6 +276,14 @@ export function Stock() {
         <ModeChip active={mode === 'inventory'} onClick={() => setMode('inventory')}>
           Mode inventaire
         </ModeChip>
+        <button
+          type="button"
+          onClick={() => setPresetsOpen(true)}
+          className="text-ink-muted ml-auto flex items-center gap-1.5 text-[12.5px] font-bold"
+        >
+          <ListIcon size={15} />
+          Présets
+        </button>
       </div>
 
       {stock.isError && (
@@ -363,6 +374,16 @@ export function Stock() {
           </button>
         </div>
       </BottomSheet>
+
+      {current && (
+        <PresetsSheet
+          open={presetsOpen}
+          onClose={() => setPresetsOpen(false)}
+          establishmentId={current.id}
+          orgId={current.org_id}
+          locations={current.locations}
+        />
+      )}
 
       {selected && (
         <StockDetailSheet
