@@ -27,10 +27,16 @@ function Barcode() {
     <span
       // Légèrement de travers : une étiquette n'est jamais parfaitement
       // alignée avec l'objectif quand on scanne d'une main.
-      className="flex flex-col items-center gap-[3px] rounded-[4px] bg-white px-2.5 py-2 shadow-[0_4px_14px_rgb(0_0_0/0.35)]"
-      style={{ transform: 'rotate(-1.5deg)' }}
+      className="flex flex-col items-center gap-[3px] rounded-[3px] bg-white/95 px-2 py-1.5"
+      style={{
+        // Légère rotation et perspective : une étiquette suit la courbe de la
+        // boîte, et `multiply` laisse le métal transparaître dessous — sans
+        // ça, le blanc pur trahit le collage.
+        transform: 'rotate(-2deg) perspective(120px) rotateY(-9deg)',
+        mixBlendMode: 'multiply',
+      }}
     >
-      <span className="flex h-[34px] items-stretch gap-[1.5px]">
+      <span className="flex h-[30px] items-stretch gap-[1.5px]">
         {BARRES.map((largeur, index) => (
           <span
             key={index}
@@ -68,44 +74,49 @@ function Vignette({ photo, className }: { photo: string; className?: string }) {
 
 export function ScanScreen() {
   return (
-    <div className="relative flex h-full flex-col items-center justify-center gap-5 px-6 pb-10">
-      {/* Vue caméra. Sur une maquette de téléphone, on doit voir ce que
-          l'objectif voit — pas la personne qui tient l'appareil. */}
+    <div className="relative h-full overflow-hidden">
+      {/* Vue caméra : une boîte de tomates posée sur un plan de travail, vue
+          d'au-dessus — ce qu'on a sous les yeux en tenant son téléphone. */}
       <img
         src="/photos/scan.jpg"
         alt=""
-        width={760}
-        height={507}
+        width={454}
+        height={620}
         loading="lazy"
         decoding="async"
         className="absolute inset-0 h-full w-full object-cover"
       />
-      {/* Assombrissement : l'aperçu caméra d'un téléphone n'est jamais en
-          pleine lumière, et le réticule doit rester lisible par-dessus. */}
-      <div className="absolute inset-0 bg-[radial-gradient(120%_70%_at_50%_42%,rgb(0_0_0/0.05),rgb(0_0_0/0.62)_75%)]" />
+      {/* L'aperçu caméra d'un téléphone n'est jamais en pleine lumière, et le
+          réticule doit rester lisible par-dessus. */}
+      <div className="absolute inset-0 bg-[radial-gradient(115%_65%_at_50%_62%,rgb(0_0_0/0.04),rgb(0_0_0/0.58)_80%)]" />
 
-      <div className="relative h-[170px] w-[170px]">
-        <span className="border-corail absolute top-0 left-0 h-9 w-9 rounded-tl-[15px] border-t-[3px] border-l-[3px]" />
-        <span className="border-corail absolute top-0 right-0 h-9 w-9 rounded-tr-[15px] border-t-[3px] border-r-[3px]" />
-        <span className="border-corail absolute bottom-0 left-0 h-9 w-9 rounded-bl-[15px] border-b-[3px] border-l-[3px]" />
-        <span className="border-corail absolute right-0 bottom-0 h-9 w-9 rounded-br-[15px] border-b-[3px] border-r-[3px]" />
-        {/* Le code-barres visé, au centre du réticule. */}
+      {/* Réticule et code-barres au même endroit : sur le corps de la boîte,
+          là où l'étiquette se trouve réellement. Un code-barres flottant au
+          centre de l'écran se voit tout de suite comme un collage. */}
+      <div className="absolute top-[62%] left-1/2 h-[124px] w-[124px] -translate-x-1/2 -translate-y-1/2">
+        <span className="border-corail absolute top-0 left-0 h-8 w-8 rounded-tl-[13px] border-t-[3px] border-l-[3px]" />
+        <span className="border-corail absolute top-0 right-0 h-8 w-8 rounded-tr-[13px] border-t-[3px] border-r-[3px]" />
+        <span className="border-corail absolute bottom-0 left-0 h-8 w-8 rounded-bl-[13px] border-b-[3px] border-l-[3px]" />
+        <span className="border-corail absolute right-0 bottom-0 h-8 w-8 rounded-br-[13px] border-b-[3px] border-r-[3px]" />
+
         <span className="absolute inset-0 flex items-center justify-center">
           <Barcode />
         </span>
 
-        <span className="absolute top-1/2 right-2.5 left-2.5 h-px bg-[linear-gradient(90deg,transparent,#FF5A3C,transparent)] shadow-[0_0_14px_rgb(255_90_60/0.9)]" />
+        <span className="absolute top-1/2 right-2 left-2 h-px bg-[linear-gradient(90deg,transparent,#FF5A3C,transparent)] shadow-[0_0_14px_rgb(255_90_60/0.9)]" />
       </div>
 
-      <p className="relative text-center text-[12px] leading-snug font-semibold text-white/85">
-        Vise le code-barres,
-        <br />
-        on s’occupe du reste.
-      </p>
+      <div className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-3.5 px-6 pb-6">
+        <p className="text-center text-[12px] leading-snug font-semibold text-white drop-shadow-[0_1px_6px_rgb(0_0_0/0.8)]">
+          Vise le code-barres,
+          <br />
+          on s’occupe du reste.
+        </p>
 
-      <div className="relative flex h-10 w-full items-center justify-center gap-2 rounded-full border-[1.4px] border-white/50 bg-white/10 text-[11.5px] font-bold text-white">
-        <PlusIcon size={14} strokeWidth={2} />
-        Ajouter sans code-barre
+        <div className="flex h-10 w-full items-center justify-center gap-2 rounded-full border-[1.4px] border-white/50 bg-black/30 text-[11.5px] font-bold text-white backdrop-blur-sm">
+          <PlusIcon size={14} strokeWidth={2} />
+          Ajouter sans code-barre
+        </div>
       </div>
     </div>
   )
