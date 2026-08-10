@@ -45,7 +45,18 @@ function phrase(days: number): string {
   return `périme dans ${days} jours`
 }
 
-export default async function handler(request: Request): Promise<Response> {
+/*
+ * Signature Web Standard, exigée par Vercel.
+ *
+ * Une `export default function` est interprétée comme l'ancienne signature
+ * Node `(req, res)` : le runtime passait deux objets Node à un code qui
+ * attendait un `Request`, et la fonction plantait avant d'exécuter la moindre
+ * ligne — 500 sans corps, indépendamment des variables d'environnement.
+ *
+ * On exporte donc la méthode HTTP, ce qui documente au passage ce que la route
+ * accepte.
+ */
+export async function GET(request: Request): Promise<Response> {
   // Vercel signe ses appels de cron. Sans ce contrôle, n'importe qui pourrait
   // déclencher une vague de notifications en visitant l'URL.
   const secret = process.env.CRON_SECRET

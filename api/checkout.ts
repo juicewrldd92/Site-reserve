@@ -12,11 +12,18 @@ import { authenticate, getAdminClient, getStripe, isError, siteUrl } from './_st
  * Stripe à faire démarrer le premier jour. Quand le restaurateur paie, il paie
  * tout de suite.
  */
-export default async function handler(request: Request): Promise<Response> {
-  if (request.method !== 'POST') {
-    return new Response('Méthode non autorisée', { status: 405 })
-  }
-
+/*
+ * Signature Web Standard, exigée par Vercel.
+ *
+ * Une `export default function` est interprétée comme l'ancienne signature
+ * Node `(req, res)` : le runtime passait deux objets Node à un code qui
+ * attendait un `Request`, et la fonction plantait avant d'exécuter la moindre
+ * ligne — 500 sans corps, indépendamment des variables d'environnement.
+ *
+ * On exporte donc la méthode HTTP, ce qui documente au passage ce que la route
+ * accepte.
+ */
+export async function POST(request: Request): Promise<Response> {
   const priceId = process.env.STRIPE_PRICE_ID
   if (!priceId) {
     return Response.json({ erreur: 'STRIPE_PRICE_ID manquante' }, { status: 500 })

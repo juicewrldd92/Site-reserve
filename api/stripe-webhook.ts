@@ -10,7 +10,18 @@ import { getAdminClient, getStripe } from './_stripe'
  * avant la redirection, et l'URL de succès se forge à la main. Un paiement n'est
  * acquis que lorsque Stripe le dit ici, signature vérifiée.
  */
-export default async function handler(request: Request): Promise<Response> {
+/*
+ * Signature Web Standard, exigée par Vercel.
+ *
+ * Une `export default function` est interprétée comme l'ancienne signature
+ * Node `(req, res)` : le runtime passait deux objets Node à un code qui
+ * attendait un `Request`, et la fonction plantait avant d'exécuter la moindre
+ * ligne — 500 sans corps, indépendamment des variables d'environnement.
+ *
+ * On exporte donc la méthode HTTP, ce qui documente au passage ce que la route
+ * accepte.
+ */
+export async function POST(request: Request): Promise<Response> {
   const secret = process.env.STRIPE_WEBHOOK_SECRET
   if (!secret) {
     return Response.json({ erreur: 'STRIPE_WEBHOOK_SECRET manquante' }, { status: 500 })
