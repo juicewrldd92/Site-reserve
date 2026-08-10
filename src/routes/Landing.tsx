@@ -467,7 +467,7 @@ function Footer() {
         <nav className="flex flex-wrap gap-6 text-[14px] text-white/55 sm:ml-auto">
           <a href="#tarif">Tarif</a>
           <Link to="/connexion">Se connecter</Link>
-          <a href="mailto:contact@reserve.app">Nous écrire</a>
+          <a href="mailto:contact@reserveapp.online">Nous écrire</a>
         </nav>
       </div>
       <p className="text-[12.5px] text-white/30 mx-auto max-w-6xl px-6 pb-8">

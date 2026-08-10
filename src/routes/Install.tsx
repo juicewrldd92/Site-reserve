@@ -207,7 +207,7 @@ function Mock({ platform }: { platform: Platform }) {
       {/* Barre d'adresse : le repère qui permet de reconnaître son navigateur. */}
       <div className="px-3 pt-1">
         <div className="bg-canvas-warm text-ink-muted flex items-center justify-between rounded-full px-3 py-1.5 text-[9px] font-semibold">
-          <span>reserve.app</span>
+          <span>reserveapp.online</span>
           <span>{platform === 'ios' ? 'aA' : '⋮'}</span>
         </div>
       </div>

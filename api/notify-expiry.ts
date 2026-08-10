@@ -60,7 +60,7 @@ export default async function handler(request: Request): Promise<Response> {
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   const publicKey = process.env.VITE_VAPID_PUBLIC_KEY
   const privateKey = process.env.VAPID_PRIVATE_KEY
-  const contact = process.env.VAPID_CONTACT ?? 'mailto:contact@reserve.app'
+  const contact = process.env.VAPID_CONTACT ?? 'mailto:contact@reserveapp.online'
 
   if (!url || !serviceKey || !publicKey || !privateKey) {
     return Response.json(
