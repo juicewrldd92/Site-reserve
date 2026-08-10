@@ -26,6 +26,7 @@ import {
 } from '@/features/orders/share'
 import { unitLabel } from '@/features/products/units'
 import { stockQueryKey } from '@/features/stock/stockRepository'
+import { displayImage } from '@/features/products/productImages'
 import { useTenancy } from '@/features/tenancy/useTenancy'
 
 /** Détail d'une liste : cases à cocher, quantités, partage. */
@@ -218,7 +219,11 @@ export function OrderDetail() {
 
             <span className="photo-ph h-[46px] w-[46px] flex-none overflow-hidden rounded-[13px]">
               {item.image_url && (
-                <img src={item.image_url} alt="" className="h-full w-full object-cover" />
+                <img
+                  src={displayImage(item.image_url, item.name) ?? undefined}
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
               )}
             </span>
 

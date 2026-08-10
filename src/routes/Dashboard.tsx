@@ -9,6 +9,7 @@ import { cn } from '@/components/ui/cn'
 import { useAlerts } from '@/features/alerts/useAlerts'
 import { useProfile } from '@/features/profile/useProfile'
 import { listOrderLists, ordersQueryKey } from '@/features/orders/orderRepository'
+import { displayImage } from '@/features/products/productImages'
 import { formatQuantity } from '@/features/products/units'
 import { expiryPhrase, stockBadge, suggestedOrderQuantity } from '@/features/stock/status'
 import { listStock, stockQueryKey } from '@/features/stock/stockRepository'
@@ -135,7 +136,7 @@ export function Dashboard() {
                 return (
                   <div key={item.id} className="flex items-center gap-3">
                     <Photo
-                      src={item.image_url}
+                      src={displayImage(item.image_url, item.name) ?? undefined}
                       size={44}
                       className="h-11 w-11 flex-none rounded-[13px]"
                     />
@@ -256,19 +257,15 @@ function Kpi({
 
 function StockTile({ item, alertDays }: { item: StockOverviewRow; alertDays: number }) {
   const badge = stockBadge(item, alertDays)
+  const photo = displayImage(item.image_url, item.name)
   return (
     <Link
       to="/stock"
       className="bg-canvas rounded-tile flex flex-col overflow-hidden"
     >
       <div className="photo-ph relative h-26">
-        {item.image_url && (
-          <img
-            src={item.image_url}
-            alt=""
-            loading="lazy"
-            className="h-full w-full object-cover"
-          />
+        {photo && (
+          <img src={photo} alt="" loading="lazy" className="h-full w-full object-cover" />
         )}
         <StatusBadge tone={badge.tone} size="sm" className="absolute top-2 right-2">
           {badge.label}

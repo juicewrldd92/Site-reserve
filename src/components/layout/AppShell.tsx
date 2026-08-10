@@ -37,7 +37,7 @@ function MobileShell() {
         {/* `min-h-0` : c'est `main` qui scrolle, jamais la page — la barre
             du bas et le bouton scan restent atteignables au pouce. */}
         <main
-          className="min-h-0 flex-1 overflow-y-auto px-5 pb-4"
+          className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-5 pb-4"
           style={{ paddingTop: 'max(env(safe-area-inset-top), 12px)' }}
         >
           {/* Au-dessus du contenu et non en bandeau fixe : il doit se lire

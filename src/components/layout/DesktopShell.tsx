@@ -137,7 +137,7 @@ export function DesktopShell() {
           </Link>
         </header>
 
-        <main className="min-h-0 flex-1 overflow-y-auto px-8 py-7">
+        <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-8 py-7">
           <div className="pb-4 empty:hidden">
             <TrialBanner />
           </div>

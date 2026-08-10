@@ -6,6 +6,7 @@ import { Photo } from '@/components/ui/Photo'
 import { cn } from '@/components/ui/cn'
 import { useAlerts } from '@/features/alerts/useAlerts'
 import { useProfile } from '@/features/profile/useProfile'
+import { displayImage } from '@/features/products/productImages'
 import { formatQuantity } from '@/features/products/units'
 import { expiryPhrase, stockBadge } from '@/features/stock/status'
 import { EstablishmentSwitcher } from '@/features/tenancy/EstablishmentSwitcher'
@@ -98,7 +99,7 @@ export function Home() {
                   className="bg-surface rounded-card shadow-card flex items-center gap-3 p-2.5"
                 >
                   <Photo
-                    src={item.image_url}
+                    src={displayImage(item.image_url, item.name)}
                     size={56}
                     className="rounded-thumb h-14 w-14 flex-none"
                   />

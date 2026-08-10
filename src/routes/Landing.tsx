@@ -367,7 +367,7 @@ function Pricing() {
               'Alertes de dates et de stock bas',
               'Listes à commander et partage',
               'Fonctionne hors-ligne',
-              'Inventaire de départ chargé avec toi',
+              'Assistance en ligne, réponse le jour même',
             ].map((line) => (
               <li key={line} className="flex items-start gap-2.5 text-[14.5px]">
                 <span className="bg-ok-bg text-ok mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full">
@@ -397,11 +397,12 @@ function FinalCta() {
       <div className="absolute inset-0 bg-[radial-gradient(80%_60%_at_50%_100%,rgb(255_90_60/0.18),transparent_70%)]" />
       <div className="relative mx-auto flex max-w-3xl flex-col items-center gap-7 px-6 py-24 text-center">
         <h2 className="font-display text-[34px] leading-tight font-semibold tracking-[-0.015em] text-white sm:text-[44px]">
-          On regarde ton stock ensemble ?
+          Ton stock, à jour dès ce soir
         </h2>
         <p className="max-w-lg text-[16.5px] leading-relaxed text-white/65">
-          Quinze minutes en visio, on charge ton inventaire pendant qu’on discute, et tu
-          vois par toi-même. Si ça ne te sert pas, tu n’entends plus parler de moi.
+          Quatorze jours pour te faire un avis, sans carte bancaire. Une question, un
+          doute, un produit qui ne rentre pas ? L’assistance répond en ligne, le jour
+          même.
         </p>
         <Link
           to="/bienvenue"

@@ -19,6 +19,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { cn } from '@/components/ui/cn'
 import { toast } from '@/components/ui/toast'
+import { displayImage } from '@/features/products/productImages'
 import { formatQuantity, unitLabel } from '@/features/products/units'
 import { PresetsSheet } from '@/features/stock/PresetsSheet'
 import { StockDetailSheet } from '@/features/stock/StockDetailSheet'
@@ -540,7 +541,7 @@ function StockTile({
       )}
     >
       <div className="relative h-[132px]">
-        <Photo src={item.image_url} size={264} className="h-full w-full" />
+        <Photo src={displayImage(item.image_url, item.name)} size={264} className="h-full w-full" />
         {picked !== null && (
           <span className="absolute top-2 left-2">
             <PickMark picked={picked} />
@@ -551,7 +552,9 @@ function StockTile({
         </StatusBadge>
       </div>
       <div className="flex flex-col gap-[3px] px-3 pt-2.5 pb-3.5">
-        <span className="line-clamp-2 text-[14.5px] leading-[1.25] font-bold">{item.name}</span>
+        <span className="line-clamp-2 [overflow-wrap:anywhere] text-[14.5px] leading-[1.25] font-bold">
+          {item.name}
+        </span>
         <span className="text-ink-muted text-[12.5px]">
           {[formatQuantity(item.quantity, item.unit), item.location]
             .filter(Boolean)
@@ -591,6 +594,9 @@ function InventoryRow({
   }
 
   const status = stockStatus(item, 5)
+  // À défaut de photo, une vignette devinée d'après le nom : un aplat gris
+  // n'aide personne à reconnaître un produit d'un coup d'œil.
+  const photo = displayImage(item.image_url, item.name)
 
   return (
     <Card
@@ -608,9 +614,7 @@ function InventoryRow({
       >
         {picked !== null && <PickMark picked={picked} />}
         <span className="photo-ph rounded-thumb h-14 w-14 flex-none overflow-hidden">
-          {item.image_url && (
-            <img src={item.image_url} alt="" className="h-full w-full object-cover" />
-          )}
+          {photo && <img src={photo} alt="" className="h-full w-full object-cover" />}
         </span>
         <span className="flex min-w-0 flex-col gap-0.5">
           <span className="truncate text-[15px] font-bold">{item.name}</span>

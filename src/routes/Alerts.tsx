@@ -10,6 +10,7 @@ import { cn } from '@/components/ui/cn'
 import { useAlerts } from '@/features/alerts/useAlerts'
 import { formatQuantity } from '@/features/products/units'
 import { StockDetailSheet } from '@/features/stock/StockDetailSheet'
+import { displayImage } from '@/features/products/productImages'
 import { expiryPhrase } from '@/features/stock/status'
 import { removeStockItem, stockQueryKey } from '@/features/stock/stockRepository'
 import { useTenancy } from '@/features/tenancy/useTenancy'
@@ -229,6 +230,6 @@ function LowRow({ item, onOpen }: { item: StockOverviewRow; onOpen: () => void }
 
 function Thumb({ item }: { item: StockOverviewRow }) {
   return (
-    <Photo src={item.image_url} size={56} className="rounded-thumb h-14 w-14 flex-none" />
+    <Photo src={displayImage(item.image_url, item.name)} size={56} className="rounded-thumb h-14 w-14 flex-none" />
   )
 }
