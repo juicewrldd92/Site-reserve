@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 
 import { CheckIcon } from '@/components/icons'
 import { Button } from '@/components/ui/Button'
@@ -22,11 +23,45 @@ export function SubscriptionCard() {
   const orgId = current?.org_id
   const [error, setError] = useState<string | null>(null)
 
+  /*
+   * Retour de Stripe.
+   *
+   * Le navigateur revient souvent **avant** le webhook : Stripe redirige tout
+   * de suite, l'événement serveur arrive une à trois secondes plus tard. Sans
+   * ça, on afficherait « S'abonner » à quelqu'un qui vient de payer — la pire
+   * seconde possible dans un parcours de paiement.
+   *
+   * On interroge donc la base toutes les deux secondes jusqu'à ce que
+   * l'abonnement apparaisse, avec une limite pour ne pas boucler indéfiniment
+   * si le webhook n'est pas configuré.
+   */
+  const [params, setParams] = useSearchParams()
+  const justPaid = params.get('abonnement') === 'ok'
+  const [waited, setWaited] = useState(0)
+
   const organization = useQuery({
     queryKey: [...subscriptionQueryKey, orgId],
     queryFn: () => fetchOrganization(orgId as string),
     enabled: Boolean(orgId),
   })
+
+  const confirmed = Boolean(organization.data?.stripe_subscription_id)
+  const awaitingWebhook = justPaid && !confirmed && waited < 12
+
+  useEffect(() => {
+    if (!awaitingWebhook) return
+    const timer = window.setTimeout(() => {
+      setWaited((n) => n + 1)
+      void organization.refetch()
+    }, 2000)
+    return () => window.clearTimeout(timer)
+  }, [awaitingWebhook, waited, organization])
+
+  // Une fois l'abonnement confirmé, on retire le paramètre : un rafraîchissement
+  // ne doit pas relancer l'attente.
+  useEffect(() => {
+    if (justPaid && confirmed) setParams({}, { replace: true })
+  }, [justPaid, confirmed, setParams])
 
   const go = useMutation({
     mutationFn: (route: 'checkout' | 'portal') =>
@@ -35,7 +70,7 @@ export function SubscriptionCard() {
   })
 
   const access = organization.data ? readAccess(organization.data) : null
-  const subscribed = Boolean(organization.data?.stripe_subscription_id)
+  const subscribed = confirmed
 
   return (
     <section className="flex flex-col gap-2.5">
@@ -44,6 +79,27 @@ export function SubscriptionCard() {
       <Card className="flex flex-col gap-3.5 p-4">
         {organization.isLoading && (
           <span className="text-ink-muted text-[14px]">Chargement…</span>
+        )}
+
+        {justPaid && confirmed && (
+          <p className="bg-ok-bg text-ok-ink rounded-card px-4 py-3 text-[13.5px] font-semibold">
+            Paiement reçu, merci. Ton abonnement est actif.
+          </p>
+        )}
+
+        {awaitingWebhook && (
+          <p className="bg-warn-bg text-warn-ink rounded-card px-4 py-3 text-[13.5px] font-semibold">
+            Paiement enregistré chez Stripe, on attend la confirmation… quelques
+            secondes.
+          </p>
+        )}
+
+        {justPaid && !confirmed && waited >= 12 && (
+          <p className="bg-alert-bg text-alert-ink rounded-card px-4 py-3 text-[13px] leading-relaxed font-semibold">
+            Ton paiement est passé mais nous n’avons pas reçu la confirmation.
+            Rafraîchis dans une minute — si rien ne change, écris-nous, rien n’est
+            perdu.
+          </p>
         )}
 
         {access && <StatusLine access={access} />}

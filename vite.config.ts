@@ -62,6 +62,9 @@ export default defineConfig({
         // sans avoir à reprendre à la main toute la config de cache.
         importScripts: ['/push-sw.js'],
         navigateFallback: '/index.html',
+        // Les fonctions serveur ne doivent jamais être servies depuis le cache :
+        // sans ça, ouvrir /api/… dans un onglet renvoie l'index de l'app.
+        navigateFallbackDenylist: [/^\/api\//],
         cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
