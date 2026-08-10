@@ -1,6 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 import webpush from 'web-push'
 
+import { withErrors } from './_errors'
+
 /**
  * Rappel quotidien des dates limites.
  *
@@ -56,7 +58,7 @@ function phrase(days: number): string {
  * On exporte donc la méthode HTTP, ce qui documente au passage ce que la route
  * accepte.
  */
-export async function GET(request: Request): Promise<Response> {
+async function handler(request: Request): Promise<Response> {
   // Vercel signe ses appels de cron. Sans ce contrôle, n'importe qui pourrait
   // déclencher une vague de notifications en visitant l'URL.
   const secret = process.env.CRON_SECRET
@@ -163,3 +165,5 @@ export async function GET(request: Request): Promise<Response> {
 
   return Response.json({ envoyees, retirees, abonnements: subs?.length ?? 0 })
 }
+
+export const GET = withErrors(handler)

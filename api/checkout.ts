@@ -1,5 +1,7 @@
 import { authenticate, getAdminClient, getStripe, isError, siteUrl } from './_stripe'
 
+import { withErrors } from './_errors'
+
 /**
  * Ouvre une session de paiement Stripe.
  *
@@ -23,7 +25,7 @@ import { authenticate, getAdminClient, getStripe, isError, siteUrl } from './_st
  * On exporte donc la méthode HTTP, ce qui documente au passage ce que la route
  * accepte.
  */
-export async function POST(request: Request): Promise<Response> {
+async function handler(request: Request): Promise<Response> {
   const priceId = process.env.STRIPE_PRICE_ID
   if (!priceId) {
     return Response.json({ erreur: 'STRIPE_PRICE_ID manquante' }, { status: 500 })
@@ -98,3 +100,5 @@ export async function POST(request: Request): Promise<Response> {
 
   return Response.json({ url: session.url })
 }
+
+export const POST = withErrors(handler)

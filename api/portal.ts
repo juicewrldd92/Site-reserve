@@ -1,5 +1,7 @@
 import { authenticate, getAdminClient, getStripe, isError, siteUrl } from './_stripe'
 
+import { withErrors } from './_errors'
+
 /**
  * Ouvre le portail de facturation Stripe.
  *
@@ -22,7 +24,7 @@ import { authenticate, getAdminClient, getStripe, isError, siteUrl } from './_st
  * On exporte donc la méthode HTTP, ce qui documente au passage ce que la route
  * accepte.
  */
-export async function POST(request: Request): Promise<Response> {
+async function handler(request: Request): Promise<Response> {
   let body: { orgId?: string }
   try {
     body = (await request.json()) as { orgId?: string }
@@ -59,3 +61,5 @@ export async function POST(request: Request): Promise<Response> {
 
   return Response.json({ url: session.url })
 }
+
+export const POST = withErrors(handler)

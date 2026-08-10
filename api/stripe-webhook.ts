@@ -2,6 +2,8 @@ import type Stripe from 'stripe'
 
 import { getAdminClient, getStripe } from './_stripe'
 
+import { withErrors } from './_errors'
+
 /**
  * Réception des événements Stripe.
  *
@@ -21,7 +23,7 @@ import { getAdminClient, getStripe } from './_stripe'
  * On exporte donc la méthode HTTP, ce qui documente au passage ce que la route
  * accepte.
  */
-export async function POST(request: Request): Promise<Response> {
+async function handler(request: Request): Promise<Response> {
   const secret = process.env.STRIPE_WEBHOOK_SECRET
   if (!secret) {
     return Response.json({ erreur: 'STRIPE_WEBHOOK_SECRET manquante' }, { status: 500 })
@@ -106,3 +108,5 @@ export async function POST(request: Request): Promise<Response> {
 
   return Response.json({ recu: true })
 }
+
+export const POST = withErrors(handler)
