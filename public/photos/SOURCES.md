@@ -12,4 +12,5 @@ sauf `scan.jpg` (vue caméra, 760 px de large).
 - `creme.jpg`      — « Free pouring milk glass blue »
 - `roquette.jpg`   — salade verte
 - `huile.jpg`      — « Olive oil bottles »
-- `scan.jpg`       — rayon de primeurs, sert de vue caméra dans le viseur
+- `scan.jpg`       — « Free close tinned tomatoes », vue caméra dans le viseur.
+                     Le code-barres par-dessus est dessiné en HTML, pas photographié.

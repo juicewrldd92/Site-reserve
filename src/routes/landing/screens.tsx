@@ -7,6 +7,45 @@ import { CalendarIcon, CheckIcon, MinusIcon, PlusIcon, ScanIcon } from '@/compon
  * vus : un aplat rayé ne donne pas envie, et c'est précisément la grille de
  * photos qui fait l'écran signature de l'app.
  */
+/**
+ * Code-barres dessiné, posé sur le produit visé.
+ *
+ * Motif fixe et non aléatoire : un `Math.random()` ferait danser les barres à
+ * chaque rendu de la démonstration, et rien n'a l'air plus faux qu'un
+ * code-barres qui change tout seul.
+ *
+ * Ce n'est pas un EAN valide et ça n'a pas à l'être — c'est une illustration,
+ * pas une étiquette à scanner.
+ */
+const BARRES = [
+  2, 1, 1, 3, 1, 2, 1, 1, 2, 3, 1, 1, 2, 1, 3, 2, 1, 1, 3, 1,
+  2, 2, 1, 3, 1, 1, 2, 1, 1, 3, 2, 1, 1, 2, 3, 1, 2, 1, 1, 2,
+]
+
+function Barcode() {
+  return (
+    <span
+      // Légèrement de travers : une étiquette n'est jamais parfaitement
+      // alignée avec l'objectif quand on scanne d'une main.
+      className="flex flex-col items-center gap-[3px] rounded-[4px] bg-white px-2.5 py-2 shadow-[0_4px_14px_rgb(0_0_0/0.35)]"
+      style={{ transform: 'rotate(-1.5deg)' }}
+    >
+      <span className="flex h-[34px] items-stretch gap-[1.5px]">
+        {BARRES.map((largeur, index) => (
+          <span
+            key={index}
+            className="bg-night"
+            style={{ width: `${largeur}px` }}
+          />
+        ))}
+      </span>
+      <span className="text-night text-[6px] leading-none font-bold tracking-[0.18em]">
+        3 256540 000178
+      </span>
+    </span>
+  )
+}
+
 function Vignette({ photo, className }: { photo: string; className?: string }) {
   return (
     <img
@@ -43,13 +82,18 @@ export function ScanScreen() {
       />
       {/* Assombrissement : l'aperçu caméra d'un téléphone n'est jamais en
           pleine lumière, et le réticule doit rester lisible par-dessus. */}
-      <div className="absolute inset-0 bg-[radial-gradient(120%_70%_at_50%_42%,rgb(0_0_0/0.15),rgb(0_0_0/0.72)_72%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(120%_70%_at_50%_42%,rgb(0_0_0/0.05),rgb(0_0_0/0.62)_75%)]" />
 
       <div className="relative h-[170px] w-[170px]">
         <span className="border-corail absolute top-0 left-0 h-9 w-9 rounded-tl-[15px] border-t-[3px] border-l-[3px]" />
         <span className="border-corail absolute top-0 right-0 h-9 w-9 rounded-tr-[15px] border-t-[3px] border-r-[3px]" />
         <span className="border-corail absolute bottom-0 left-0 h-9 w-9 rounded-bl-[15px] border-b-[3px] border-l-[3px]" />
         <span className="border-corail absolute right-0 bottom-0 h-9 w-9 rounded-br-[15px] border-b-[3px] border-r-[3px]" />
+        {/* Le code-barres visé, au centre du réticule. */}
+        <span className="absolute inset-0 flex items-center justify-center">
+          <Barcode />
+        </span>
+
         <span className="absolute top-1/2 right-2.5 left-2.5 h-px bg-[linear-gradient(90deg,transparent,#FF5A3C,transparent)] shadow-[0_0_14px_rgb(255_90_60/0.9)]" />
       </div>
 
