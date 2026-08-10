@@ -429,8 +429,23 @@ function Footer() {
           <a href="mailto:contact@reserveapp.online">Nous écrire</a>
         </nav>
       </div>
-      <p className="text-[12.5px] text-white/30 mx-auto max-w-6xl px-6 pb-8">
-        © {new Date().getFullYear()} Réserve — l’app de stock des restaurateurs.
+      {/* Crédit obligatoire : la photo du rayon est en CC BY-SA, contrairement
+          aux autres qui sont en CC0. L'attribution fait partie de la licence,
+          elle n'est pas facultative. */}
+      <p className="text-[12.5px] text-white/30 mx-auto flex max-w-6xl flex-col gap-1 px-6 pb-8">
+        <span>© {new Date().getFullYear()} Réserve — l’app de stock des restaurateurs.</span>
+        <span>
+          Photo du rayon :{' '}
+          <a
+            href="https://commons.wikimedia.org/wiki/File:New_World_(supermarket)_dairy_shelving.jpg"
+            className="underline"
+            rel="noreferrer"
+            target="_blank"
+          >
+            Panamitsu
+          </a>
+          , CC BY-SA 4.0.
+        </span>
       </p>
     </footer>
   )

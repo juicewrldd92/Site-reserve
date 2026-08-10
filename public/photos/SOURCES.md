@@ -12,6 +12,9 @@ sauf `scan.jpg` (vue caméra, 760 px de large).
 - `creme.jpg`      — « Free pouring milk glass blue »
 - `roquette.jpg`   — salade verte
 - `huile.jpg`      — « Olive oil bottles »
-- `scan.jpg`       — « Free close tinned tomatoes », recadrée sur la boîte de devant.
-                     Sert de vue caméra ; le code-barres posé dessus est dessiné en
-                     HTML et fondu en `multiply` pour laisser le métal transparaître.
+- `scan.jpg`       — « New World (supermarket) dairy shelving », Panamitsu,
+                     Wikimedia Commons. **CC BY-SA 4.0, pas CC0** : l'attribution
+                     est obligatoire et figure dans le pied de page du site. Si
+                     cette photo est remplacée un jour, penser à retirer le crédit.
+                     Recadrée en portrait sur les bidons de lait ; le code-barres
+                     posé dessus est dessiné en HTML et fondu en `multiply`.

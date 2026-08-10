@@ -75,25 +75,25 @@ function Vignette({ photo, className }: { photo: string; className?: string }) {
 export function ScanScreen() {
   return (
     <div className="relative h-full overflow-hidden">
-      {/* Vue caméra : une boîte de tomates posée sur un plan de travail, vue
-          d'au-dessus — ce qu'on a sous les yeux en tenant son téléphone. */}
+      {/* Vue caméra : ce que l'objectif voit quand on vise un produit dans
+          un rayon crémerie, avec la profondeur d'un vrai magasin. */}
       <img
         src="/photos/scan.jpg"
         alt=""
-        width={454}
-        height={620}
+        width={505}
+        height={880}
         loading="lazy"
         decoding="async"
         className="absolute inset-0 h-full w-full object-cover"
       />
       {/* L'aperçu caméra d'un téléphone n'est jamais en pleine lumière, et le
           réticule doit rester lisible par-dessus. */}
-      <div className="absolute inset-0 bg-[radial-gradient(115%_65%_at_50%_62%,rgb(0_0_0/0.04),rgb(0_0_0/0.58)_80%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(115%_65%_at_50%_66%,rgb(0_0_0/0.04),rgb(0_0_0/0.58)_80%)]" />
 
       {/* Réticule et code-barres au même endroit : sur le corps de la boîte,
           là où l'étiquette se trouve réellement. Un code-barres flottant au
           centre de l'écran se voit tout de suite comme un collage. */}
-      <div className="absolute top-[62%] left-1/2 h-[124px] w-[124px] -translate-x-1/2 -translate-y-1/2">
+      <div className="absolute top-[66%] left-1/2 h-[112px] w-[112px] -translate-x-1/2 -translate-y-1/2">
         <span className="border-corail absolute top-0 left-0 h-8 w-8 rounded-tl-[13px] border-t-[3px] border-l-[3px]" />
         <span className="border-corail absolute top-0 right-0 h-8 w-8 rounded-tr-[13px] border-t-[3px] border-r-[3px]" />
         <span className="border-corail absolute bottom-0 left-0 h-8 w-8 rounded-bl-[13px] border-b-[3px] border-l-[3px]" />
