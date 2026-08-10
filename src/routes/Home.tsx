@@ -1,15 +1,18 @@
 import { Link } from 'react-router-dom'
 
-import { BellIcon, ScanIcon } from '@/components/icons'
+import { BellIcon, ChevronRightIcon, ScanIcon } from '@/components/icons'
 import { Card } from '@/components/ui/Card'
 import { Photo } from '@/components/ui/Photo'
 import { cn } from '@/components/ui/cn'
+import { useQuery } from '@tanstack/react-query'
+
 import { useAlerts } from '@/features/alerts/useAlerts'
 import { useProfile } from '@/features/profile/useProfile'
 import { displayImage } from '@/features/products/productImages'
 import { formatQuantity } from '@/features/products/units'
 import { expiryPhrase, stockBadge } from '@/features/stock/status'
 import { EstablishmentSwitcher } from '@/features/tenancy/EstablishmentSwitcher'
+import { listStock, stockQueryKey } from '@/features/stock/stockRepository'
 import { useTenancy } from '@/features/tenancy/useTenancy'
 
 /** Accueil — switcher d'établissement, alertes chiffrées, CTA scan. */
@@ -21,6 +24,12 @@ export function Home() {
   const alertDays = current?.dlc_alert_days ?? 5
   // Les 3 lignes les plus urgentes, tous groupes confondus.
   const watchlist = [...groups.expired, ...groups.expiring, ...groups.low].slice(0, 3)
+  const stock = useQuery({
+    queryKey: [...stockQueryKey, current?.id],
+    queryFn: () => listStock(current?.id as string),
+    enabled: Boolean(current?.id),
+  })
+  const total = stock.data?.length ?? 0
 
   return (
     <div className="flex flex-col gap-5 pb-6">
@@ -38,41 +47,70 @@ export function Home() {
         </Link>
       </header>
 
-      <div className="flex flex-col gap-0.5">
-        <h1 className="text-[27px] font-extrabold tracking-[-0.03em]">
-          Salut {displayName} 👋
+      {/*
+        La date et l'établissement plutôt qu'un « Salut » à l'emoji : c'est un
+        outil de travail qu'on ouvre entre deux services, pas une application
+        grand public. On situe d'abord, on interpelle ensuite.
+      */}
+      <div className="flex flex-col gap-1">
+        <span className="text-ink-faint text-[12.5px] font-bold tracking-wide uppercase">
+          {new Date().toLocaleDateString('fr-FR', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+          })}
+        </span>
+        <h1 className="text-[25px] leading-tight font-extrabold tracking-[-0.03em]">
+          Bonjour {displayName}
         </h1>
-        <p className="text-ink-muted text-[15.5px]">Voilà ce qui bouge dans ta réserve.</p>
+        {current?.name && (
+          <p className="text-ink-muted text-[14.5px]">{current.name}</p>
+        )}
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      {/* Les compteurs mènent où il faut : un chiffre qui alerte sans donner
+          accès à ce qu'il désigne est une impasse. */}
+      <div className="grid grid-cols-3 gap-2.5">
         <StatCard
+          to="/stock"
+          tint="bg-ok-bg"
+          dot="bg-ok"
+          value={total}
+          loading={isLoading}
+          label="produits"
+        />
+        <StatCard
+          to="/alertes"
           tint="bg-warn-bg"
           dot="bg-warn"
           value={groups.low.length}
           loading={isLoading}
-          label="en stock bas"
+          label="stock bas"
         />
         <StatCard
+          to="/alertes"
           tint="bg-alert-bg"
           dot="bg-alert"
           value={groups.expired.length + groups.expiring.length}
           loading={isLoading}
-          label={`DLC sous ${alertDays} j`}
+          label={`DLC ${alertDays} j`}
         />
       </div>
 
       <Link
         to="/scan"
-        className="bg-corail flex items-center gap-4 rounded-3xl p-5 shadow-[0_14px_30px_rgb(255_90_60/0.30)]"
+        className="bg-night flex items-center gap-3.5 rounded-3xl p-4 shadow-[0_14px_30px_rgb(26_26_26/0.22)]"
       >
-        <span className="flex h-[54px] w-[54px] flex-none items-center justify-center rounded-[18px] bg-white/20 text-white">
-          <ScanIcon size={28} />
+        <span className="bg-corail flex h-12 w-12 flex-none items-center justify-center rounded-[16px] text-white">
+          <ScanIcon size={25} />
         </span>
-        <span className="flex flex-col gap-0.5">
-          <span className="text-[18px] font-bold text-white">Scanner un produit</span>
-          <span className="text-[13.5px] text-white/90">2 secondes, et c'est dans le stock</span>
+        <span className="flex flex-1 flex-col gap-0.5">
+          <span className="text-[16.5px] font-bold text-white">Scanner un produit</span>
+          <span className="text-[13px] text-white/55">
+            Trois secondes, code-barres ou photo
+          </span>
         </span>
+        <ChevronRightIcon size={18} className="flex-none text-white/40" />
       </Link>
 
       <section className="flex flex-col gap-3">
@@ -139,33 +177,39 @@ function StatCard({
   dot,
   value,
   label,
+  to,
   loading = false,
 }: {
   tint: string
   dot: string
   value: number
   label: string
+  to: string
   loading?: boolean
 }) {
   return (
-    <Card className="flex flex-col gap-[7px] p-4">
-      <span className={`flex h-8 w-8 items-center justify-center rounded-[11px] ${tint}`}>
-        <span className={`h-[9px] w-[9px] rounded-full ${dot}`} />
-      </span>
-      {loading ? (
-        // Un « 0 » affiché pendant le chargement se lit « tout va bien » — le
-        // pire malentendu possible pour une app dont c'est toute la promesse.
-        <span
-          aria-hidden
-          className="bg-canvas-warm my-[3px] h-[24px] w-10 animate-pulse rounded-lg"
-        />
-      ) : (
-        <span className="text-[30px] leading-none font-extrabold tracking-[-0.03em]">
-          {value}
+    <Link to={to} className="contents">
+      <Card className="flex flex-col gap-1.5 p-3.5">
+        <span className={`flex h-7 w-7 items-center justify-center rounded-[10px] ${tint}`}>
+          <span className={`h-2 w-2 rounded-full ${dot}`} />
         </span>
-      )}
-      <span className="text-ink-muted text-[13.5px] font-semibold">{label}</span>
-    </Card>
+        {loading ? (
+          // Un « 0 » affiché pendant le chargement se lit « tout va bien » — le
+          // pire malentendu possible pour une app dont c'est toute la promesse.
+          <span
+            aria-hidden
+            className="bg-canvas-warm my-[3px] h-[24px] w-10 animate-pulse rounded-lg"
+          />
+        ) : (
+          <span className="text-[24px] leading-none font-extrabold tracking-[-0.03em]">
+            {value}
+          </span>
+        )}
+        <span className="text-ink-muted text-[12px] leading-tight font-semibold">
+          {label}
+        </span>
+      </Card>
+    </Link>
   )
 }
 
