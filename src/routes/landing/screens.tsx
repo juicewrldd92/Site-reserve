@@ -27,13 +27,15 @@ function Barcode() {
     <span
       // Légèrement de travers : une étiquette n'est jamais parfaitement
       // alignée avec l'objectif quand on scanne d'une main.
-      className="flex flex-col items-center gap-[3px] rounded-[3px] bg-white/95 px-2 py-1.5"
+      className="flex flex-col items-center gap-[3px] rounded-[3px] bg-white px-2 py-1.5 shadow-[0_3px_10px_rgb(0_0_0/0.45)]"
       style={{
-        // Légère rotation et perspective : une étiquette suit la courbe de la
-        // boîte, et `multiply` laisse le métal transparaître dessous — sans
-        // ça, le blanc pur trahit le collage.
-        transform: 'rotate(-2deg) perspective(120px) rotateY(-9deg)',
-        mixBlendMode: 'multiply',
+        // Sur une bouteille sombre, l'étiquette doit rester franche : un fondu
+        // `multiply` la grisait et les barres devenaient illisibles.
+        //
+        // Perspective volontairement faible : plus la surface est de face,
+        // plus les barres se lisent — c'est aussi ainsi qu'on tient son
+        // téléphone quand on scanne pour de vrai.
+        transform: 'rotate(-2.5deg) perspective(260px) rotateY(-5deg)',
       }}
     >
       <span className="flex h-[30px] items-stretch gap-[1.5px]">
@@ -88,12 +90,12 @@ export function ScanScreen() {
       />
       {/* L'aperçu caméra d'un téléphone n'est jamais en pleine lumière, et le
           réticule doit rester lisible par-dessus. */}
-      <div className="absolute inset-0 bg-[radial-gradient(115%_65%_at_50%_66%,rgb(0_0_0/0.04),rgb(0_0_0/0.58)_80%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(115%_65%_at_50%_31%,rgb(0_0_0/0.04),rgb(0_0_0/0.58)_80%)]" />
 
       {/* Réticule et code-barres au même endroit : sur le corps de la boîte,
           là où l'étiquette se trouve réellement. Un code-barres flottant au
           centre de l'écran se voit tout de suite comme un collage. */}
-      <div className="absolute top-[66%] left-1/2 h-[112px] w-[112px] -translate-x-1/2 -translate-y-1/2">
+      <div className="absolute top-[31%] left-1/2 h-[158px] w-[158px] -translate-x-1/2 -translate-y-1/2">
         <span className="border-corail absolute top-0 left-0 h-8 w-8 rounded-tl-[13px] border-t-[3px] border-l-[3px]" />
         <span className="border-corail absolute top-0 right-0 h-8 w-8 rounded-tr-[13px] border-t-[3px] border-r-[3px]" />
         <span className="border-corail absolute bottom-0 left-0 h-8 w-8 rounded-bl-[13px] border-b-[3px] border-l-[3px]" />
