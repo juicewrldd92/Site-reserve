@@ -6,6 +6,7 @@ import { cn } from '@/components/ui/cn'
 import { PRICE_LABEL, TRIAL_LABEL } from '@/lib/offer'
 
 import { PhoneFrame } from './landing/PhoneFrame'
+import { Plate } from './landing/Plate'
 import { Showcase } from './landing/Showcase'
 import { Simulator } from './landing/Simulator'
 import { AlertScreen, OrderScreen, ScanScreen, StockScreen } from './landing/screens'
@@ -28,6 +29,7 @@ export function Landing() {
       <Hero />
       <Simulator />
       <Promises />
+      <Larder />
       <Showcase />
       <Proof />
       <Module
@@ -91,7 +93,7 @@ function TopBar() {
             href="#simulateur"
             className="hidden text-[14px] font-semibold text-white/70 sm:block"
           >
-            Ce que tu jettes
+            Tes pertes
           </a>
           <a href="#app" className="hidden text-[14px] font-semibold text-white/70 sm:block">
             L’app
@@ -146,7 +148,7 @@ function Hero() {
               href="#simulateur"
               className="flex h-13 items-center rounded-full border border-white/20 px-6 text-[15.5px] font-semibold text-white/80"
             >
-              Calculer ce que je jette
+              Estimer mes pertes
             </a>
           </div>
           <div className="flex items-center gap-2 text-[14px] text-white/45">
@@ -202,19 +204,67 @@ function Promises() {
   )
 }
 
+function Larder() {
+  const plates = [
+    {
+      name: 'mozzarella' as const,
+      alt: 'Burrata sur un lit de tomates anciennes',
+      title: 'Le frais',
+      text: 'Celui qui se compte en jours, pas en semaines.',
+    },
+    {
+      name: 'basilic' as const,
+      alt: 'Feuilles de basilic frais',
+      title: 'Les herbes',
+      text: 'Achetées le lundi, oubliées le jeudi.',
+    },
+    {
+      name: 'farine' as const,
+      alt: 'Pâtes sèches sur une assiette blanche',
+      title: 'Le sec',
+      text: 'Qu’on croit inépuisable, jusqu’au samedi soir.',
+    },
+  ]
+
+  return (
+    <Section>
+      <div className="grid gap-5 sm:grid-cols-3">
+        {plates.map((plate) => (
+          <figure key={plate.name} className="flex flex-col gap-3">
+            <div className="rounded-sheet shadow-card h-[200px] overflow-hidden">
+              <Plate name={plate.name} alt={plate.alt} />
+            </div>
+            <figcaption className="flex flex-col gap-1 px-1">
+              <span className="text-[16px] font-bold tracking-[-0.01em]">{plate.title}</span>
+              <span className="text-ink-muted text-[14px] leading-snug">{plate.text}</span>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+    </Section>
+  )
+}
+
 function Proof() {
   return (
     <Section warm>
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-8 text-center">
+        <div className="rounded-sheet shadow-card-lg h-[220px] w-full overflow-hidden sm:h-[300px]">
+          <Plate
+            name="tomates"
+            alt="Rangs de tomates mûrissant au soleil"
+            className="scale-105"
+          />
+        </div>
         <h2 className="font-display text-[30px] leading-tight font-semibold tracking-[-0.015em] sm:text-[38px]">
-          Un restaurant jette en moyenne
+          Un restaurant perd en moyenne
           <br />
-          entre 15 et 20 % de ce qu’il achète
+          15 à 20 % de ce qu’il achète
         </h2>
         <p className="text-ink-muted max-w-xl text-[16px] leading-relaxed">
-          Une bonne partie part sans que personne ne l’ait vu venir : un bac oublié au fond,
-          une date dépassée d’un jour, une commande passée deux fois. C’est exactement ce
-          que Réserve rend visible.
+          L’essentiel se perd sans que personne ne l’ait vu venir : un bac oublié au fond
+          d’une chambre froide, une date dépassée d’un jour, une commande passée deux
+          fois. C’est précisément ce que Réserve rend visible.
         </p>
         <div className="grid w-full gap-4 sm:grid-cols-3">
           {[
@@ -335,6 +385,11 @@ function Pricing() {
           <br />
           de tomates oubliée
         </h2>
+
+        {/* La cagette du titre, en vrai. */}
+        <div className="rounded-sheet shadow-card h-[180px] w-full max-w-sm overflow-hidden">
+          <Plate name="legumes" alt="Cagette de courgettes portée au marché" />
+        </div>
 
         <div className="bg-surface rounded-sheet shadow-card w-full max-w-sm px-8 py-9">
           <div className="flex items-baseline justify-center gap-1.5">

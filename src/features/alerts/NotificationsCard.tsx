@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 
 import { Card } from '@/components/ui/Card'
 import { cn } from '@/components/ui/cn'
@@ -58,10 +59,15 @@ export function NotificationsCard() {
           <div className="flex flex-col gap-1">
             <span className="text-[15px] font-semibold">Ajoute Réserve à ton écran</span>
             <p className="text-ink-muted text-[13px] leading-relaxed">
-              Sur iPhone, les notifications n'existent que si l'app est installée :
-              bouton Partager, puis « Sur l'écran d'accueil ». Rouvre Réserve depuis
-              l'icône et le réglage apparaîtra ici.
+              Sur iPhone, les notifications n'existent que si l'app est installée sur
+              l'écran d'accueil. Ça prend une minute.
             </p>
+            <Link
+              to="/installation"
+              className="bg-corail flex h-11 items-center justify-center rounded-full text-[14.5px] font-bold text-white"
+            >
+              Voir comment faire
+            </Link>
           </div>
         )}
 

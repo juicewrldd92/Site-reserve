@@ -87,7 +87,11 @@ export function Onboarding() {
       await queryClient.invalidateQueries({ queryKey: profileQueryKey })
       // Navigation explicite : le garde de `/onboarding` ne regarde que la
       // session, il ne nous sortirait pas d'ici tout seul.
-      navigate('/', { replace: true })
+      //
+      // On passe par l'installation : c'est le seul moment où l'on est sûr
+      // d'avoir l'attention du restaurateur, et sur iPhone les notifications
+      // n'existent pas tant que l'app n'est pas sur l'écran d'accueil.
+      navigate('/installation', { replace: true })
     },
   })
 

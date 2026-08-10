@@ -62,7 +62,7 @@ export function Simulator() {
     },
     {
       key: 'staple1',
-      prompt: `Sur ${type?.staples[0].label ?? 'les produits frais'}, tu jettes…`,
+      prompt: `Sur ${type?.staples[0].label ?? 'les produits frais'}, tu perds…`,
       hint: 'Sur une semaine normale.',
       options: WASTE_OPTIONS,
     },
@@ -127,13 +127,13 @@ export function Simulator() {
             40 secondes
           </span>
           <h2 className="font-display text-[30px] leading-tight font-semibold tracking-[-0.015em] sm:text-[38px]">
-            Combien te coûte
+            Ce que tes pertes
             <br />
-            ce que tu jettes ?
+            te coûtent vraiment
           </h2>
           <p className="text-ink-muted max-w-lg text-[16px] leading-relaxed">
-            Six questions courtes, adaptées à ta cuisine. À la fin, un ordre de grandeur de
-            ce qui part à la poubelle — en euros et en heures.
+            Six questions courtes, adaptées à ta cuisine. À la fin, un ordre de grandeur
+            de ce qui se perd entre la livraison et l’assiette — en euros et en heures.
           </p>
         </div>
 
@@ -224,12 +224,12 @@ function Result({
     <div className="flex flex-col">
       <div className="bg-night flex flex-col gap-2 px-6 py-9 text-center sm:px-9">
         <span className="text-[13px] font-bold tracking-wide text-white/50 uppercase">
-          Tu jettes environ
+          Pertes estimées
         </span>
         <span className="font-display text-[44px] leading-none font-semibold text-white sm:text-[56px]">
           {euros(result.wastedPerYear)}
         </span>
-        <span className="text-[15px] text-white/60">de nourriture par an</span>
+        <span className="text-[15px] text-white/60">de marchandise chaque année</span>
       </div>
 
       <div className="flex flex-col gap-5 p-6 sm:p-9">
@@ -252,8 +252,8 @@ function Result({
             {euros(result.recoverable[0])} à {euros(result.recoverable[1])}
           </span>
           <span className="text-fresh-ink/80 text-[13.5px] leading-relaxed">
-            par an, plus environ {result.hoursSaved} h de ton temps. Suivre ses dates ne
-            supprime pas le gaspillage — mais voir ce qui va tourner avant de le jeter
+            par an, plus environ {result.hoursSaved} h de ton temps. Suivre ses dates
+            n’élimine pas les pertes — mais repérer ce qui va tourner avant l’échéance
             change nettement l’ardoise.
           </span>
         </div>

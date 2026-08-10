@@ -4,13 +4,14 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
 import { AppShell } from '@/components/layout/AppShell'
 import { AuthProvider } from '@/features/auth/AuthProvider'
-import { PublicOnly, RequireEstablishment, RequireOnboarding } from '@/features/auth/guards'
+import { PublicOnly, RequireEstablishment, RequireOnboarding, RequireSession } from '@/features/auth/guards'
 import { TenancyProvider } from '@/features/tenancy/TenancyProvider'
 import { queryClient } from '@/lib/queryClient'
 import { Alerts } from '@/routes/Alerts'
 import { Overview } from '@/routes/Overview'
 import { Login } from '@/routes/Login'
 import { ManualProduct } from '@/routes/ManualProduct'
+import { Install } from '@/routes/Install'
 import { Onboarding } from '@/routes/Onboarding'
 import { OrderDetail } from '@/routes/OrderDetail'
 import { Orders } from '@/routes/Orders'
@@ -64,6 +65,18 @@ export function App() {
                   <PublicOnly>
                     <Login />
                   </PublicOnly>
+                }
+              />
+              {/* Après la création du compte : installation sur l'écran
+                  d'accueil. Sous `RequireSession` et non `RequireEstablishment` :
+                  l'établissement vient d'être créé, mais le cache de tenancy
+                  peut ne pas l'avoir encore vu. */}
+              <Route
+                path="/installation"
+                element={
+                  <RequireSession>
+                    <Install />
+                  </RequireSession>
                 }
               />
               <Route

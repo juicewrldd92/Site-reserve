@@ -119,7 +119,7 @@ export const WASTE_OPTIONS = [
   { label: 'Presque rien', value: 0 },
   { label: 'Un peu', value: 0.015 },
   { label: 'Pas mal', value: 0.035 },
-  { label: 'Trop', value: 0.06 },
+  { label: 'Beaucoup', value: 0.06 },
 ]
 
 export const EXPIRY_OPTIONS = [
