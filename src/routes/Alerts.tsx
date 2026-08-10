@@ -36,7 +36,7 @@ export function Alerts() {
         <h1 className="text-[27px] font-extrabold tracking-[-0.03em]">Alertes</h1>
         <EmptyState
           title="Rien à signaler"
-          text="Tout est frais, rien sous les seuils. On te préviendra dès que ça bouge."
+          text="Tout est frais, rien sous les seuils. On te préviendra dès qu’une date approche."
         />
       </div>
     )

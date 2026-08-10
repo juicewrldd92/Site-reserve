@@ -39,7 +39,7 @@ export function Landing() {
       <Proof />
       <Module
         eyebrow="Le scan"
-        title={['Prends une photo,', 'oublie la saisie']}
+        title={['Une photo suffit,', 'la saisie s’efface']}
         text="Vise un code-barres : le nom, la marque et la photo arrivent tout seuls. Pas de code-barres ? Une photo et trois taps. En cuisine, c’est 70 % du stock — chez nous ce n’est pas un cas particulier, c’est le cas normal."
         bullets={[
           'Fonctionne sur iPhone comme sur Android',
@@ -51,7 +51,7 @@ export function Landing() {
       />
       <Module
         eyebrow="Les dates"
-        title={['Sois prévenu avant', 'que ça tourne']}
+        title={['Prévenu avant', 'que ça tourne']}
         text="Chaque lot porte sa date. L’app prévient au délai que tu choisis — un jour, une semaine, un mois — et le réglage se fait produit par produit. Un yaourt et un sac de farine ne se surveillent pas au même rythme."
         bullets={[
           'Alertes groupées par urgence, action directe sur chaque ligne',
@@ -63,7 +63,7 @@ export function Landing() {
       />
       <Module
         eyebrow="Les commandes"
-        title={['Arrête de commander', 'au feeling']}
+        title={['Ne commande plus', 'à l’aveugle']}
         text="Tu renseignes un stock mini et un stock optimal. Dès qu’un produit passe dessous, l’app calcule la quantité à commander pour revenir au bon niveau, et regroupe la liste par fournisseur."
         bullets={[
           'Liste générée en un tap depuis le stock bas',
@@ -94,25 +94,27 @@ function TopBar() {
             Réserve
           </span>
         </span>
+        {/*
+          Deux groupes séparés d'un filet : à gauche ce qu'on vient lire, à
+          droite ce qu'on vient faire. « Installer » quitte la barre — c'est un
+          geste d'après-inscription, il reste dans sa section et dans le pied
+          de page. Il n'avait rien à faire entre le tarif et la connexion.
+        */}
         <nav className="ml-auto flex items-center gap-6">
-          <a
-            href="#simulateur"
-            className="hidden text-[14px] font-semibold text-white/70 sm:block"
-          >
-            Tes pertes
-          </a>
-          <a href="#app" className="hidden text-[14px] font-semibold text-white/70 sm:block">
-            L’app
-          </a>
-          <a href="#tarif" className="hidden text-[14px] font-semibold text-white/70 sm:block">
-            Tarif
-          </a>
-          <a
-            href="#installer"
-            className="hidden text-[14px] font-semibold text-white/70 lg:block"
-          >
-            Installer
-          </a>
+          <span className="hidden items-center gap-6 sm:flex">
+            <a href="#simulateur" className="text-[14px] font-semibold text-white/70">
+              Estimation
+            </a>
+            <a href="#app" className="text-[14px] font-semibold text-white/70">
+              L’app
+            </a>
+            <a href="#tarif" className="text-[14px] font-semibold text-white/70">
+              Tarif
+            </a>
+          </span>
+
+          <span className="hidden h-5 w-px bg-white/15 sm:block" />
+
           <Link to="/connexion" className="text-[14px] font-semibold text-white/70">
             Se connecter
           </Link>
@@ -145,8 +147,8 @@ function Hero() {
             qu’un carnet à&nbsp;spirale
           </h1>
           <p className="text-[17px] leading-relaxed text-white/65">
-            Pour les restaurants indépendants fatigués de commander au pif, de jeter ce
-            qu’ils n’ont pas vu passer, et de compter leur stock sur un bout de papier.
+            Pour les restaurants indépendants lassés de commander à l’estime, de perdre
+            ce qu’ils n’ont pas vu venir, et de compter leur stock sur un coin de nappe.
           </p>
           <div className="flex flex-wrap items-center gap-3 pt-1">
             <Link
@@ -425,6 +427,7 @@ function Footer() {
         </span>
         <nav className="flex flex-wrap gap-6 text-[14px] text-white/55 sm:ml-auto">
           <a href="#tarif">Tarif</a>
+          <a href="#installer">Installer l’app</a>
           <Link to="/connexion">Se connecter</Link>
           <a href="mailto:contact@reserveapp.online">Nous écrire</a>
         </nav>

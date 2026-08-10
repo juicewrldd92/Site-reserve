@@ -163,8 +163,8 @@ export function Stock() {
       <div className="flex min-h-full flex-col">
         <h1 className="text-[27px] font-extrabold tracking-[-0.03em]">Mon stock</h1>
         <EmptyState
-          title="Ton stock est vide 👀"
-          text="Scanne ton premier produit, ça prend 2 secondes et après c'est l'app qui bosse."
+          title="Ton stock est encore vide"
+          text="Scanne ton premier produit : trois secondes, et l'app prend le relais."
           action={
             <Button block={false} onClick={() => navigate('/scan')}>
               Scanner mon premier produit

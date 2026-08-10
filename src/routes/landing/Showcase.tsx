@@ -17,14 +17,14 @@ const CHAPTERS: Chapter[] = [
   {
     id: 'scan',
     tab: 'Scanner',
-    title: 'Le produit entre en trois secondes',
+    title: 'Un produit entre en trois secondes',
     text: "Vise le code-barres : nom, marque et photo arrivent d'Open Food Facts. Pas de code-barres — une burrata, un bac de sauce, un sac de farine en vrac ? Tu prends la photo et tu tapes le nom. C'est 70 % d'une cuisine, et chez nous ce n'est pas le cas particulier.",
     screen: <ScanScreen />,
   },
   {
     id: 'stock',
     tab: 'Stock',
-    title: 'Ton stock se lit sans le lire',
+    title: 'Ton stock se lit d’un regard',
     text: "Une grille de photos, une pastille de couleur par produit. Vert : ça va. Orange : la date approche. Rouge : il faut agir. Filtre par frigo, par catégorie, par urgence — et le mode inventaire ajuste les quantités au pouce, étagère par étagère.",
     screen: <StockScreen />,
   },
@@ -38,7 +38,7 @@ const CHAPTERS: Chapter[] = [
   {
     id: 'commandes',
     tab: 'Commandes',
-    title: 'La liste se remplit toute seule',
+    title: 'La commande s’écrit d’elle-même',
     text: "Stock mini, stock optimal : dès qu'un produit passe dessous, l'app calcule ce qu'il faut recommander pour revenir au bon niveau. Tu valides la commande, et le stock remonte tout seul à la réception.",
     screen: <OrderScreen />,
   },
@@ -88,7 +88,7 @@ export function Showcase() {
             L’app, écran par écran
           </span>
           <h2 className="font-display max-w-2xl text-[30px] leading-tight font-semibold tracking-[-0.015em] text-white sm:text-[38px]">
-            Voilà exactement ce que tu auras
+            Exactement ce que tu auras en main
           </h2>
         </div>
 
