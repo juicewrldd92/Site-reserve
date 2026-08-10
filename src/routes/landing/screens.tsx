@@ -1,6 +1,27 @@
 import { CalendarIcon, CheckIcon, MinusIcon, PlusIcon, ScanIcon } from '@/components/icons'
 
 /**
+ * Vignette produit des écrans de démonstration.
+ *
+ * Les écrans sont dessinés en HTML, mais les produits, eux, méritent d'être
+ * vus : un aplat rayé ne donne pas envie, et c'est précisément la grille de
+ * photos qui fait l'écran signature de l'app.
+ */
+function Vignette({ photo, className }: { photo: string; className?: string }) {
+  return (
+    <img
+      src={`/photos/${photo}.jpg`}
+      alt=""
+      width={420}
+      height={420}
+      loading="lazy"
+      decoding="async"
+      className={`photo-ph object-cover ${className ?? ''}`}
+    />
+  )
+}
+
+/**
  * Les trois écrans montrés sur la vitrine, reconstruits à partir du design
  * system de l’app. Données d’exemple assumées : ce sont des illustrations,
  * pas des captures d’un vrai compte.
@@ -9,8 +30,20 @@ import { CalendarIcon, CheckIcon, MinusIcon, PlusIcon, ScanIcon } from '@/compon
 export function ScanScreen() {
   return (
     <div className="relative flex h-full flex-col items-center justify-center gap-5 px-6 pb-10">
-      <div className="absolute inset-0 bg-[repeating-linear-gradient(135deg,#2A231E_0_10px,#241E1A_10px_20px)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(120%_70%_at_50%_42%,rgb(255_255_255/0.10),rgb(0_0_0/0.55)_70%)]" />
+      {/* Vue caméra. Sur une maquette de téléphone, on doit voir ce que
+          l'objectif voit — pas la personne qui tient l'appareil. */}
+      <img
+        src="/photos/scan.jpg"
+        alt=""
+        width={760}
+        height={507}
+        loading="lazy"
+        decoding="async"
+        className="absolute inset-0 h-full w-full object-cover"
+      />
+      {/* Assombrissement : l'aperçu caméra d'un téléphone n'est jamais en
+          pleine lumière, et le réticule doit rester lisible par-dessus. */}
+      <div className="absolute inset-0 bg-[radial-gradient(120%_70%_at_50%_42%,rgb(0_0_0/0.15),rgb(0_0_0/0.72)_72%)]" />
 
       <div className="relative h-[170px] w-[170px]">
         <span className="border-corail absolute top-0 left-0 h-9 w-9 rounded-tl-[15px] border-t-[3px] border-l-[3px]" />
@@ -36,10 +69,10 @@ export function ScanScreen() {
 
 export function StockScreen() {
   const items = [
-    { name: 'Tomates San Marzano', meta: '12 boîtes · Réserve', tone: 'ok', badge: 'En stock' },
-    { name: 'Mozzarella di bufala', meta: '4 pièces · Frigo', tone: 'alert', badge: 'DLC J-1' },
-    { name: 'Farine T65', meta: '2 sacs · Réserve', tone: 'warn', badge: 'Stock bas' },
-    { name: 'Basilic frais', meta: '3 bottes · Frigo', tone: 'warn', badge: 'DLC J-3' },
+    { name: 'Tomates San Marzano', meta: '12 boîtes · Réserve', tone: 'ok', badge: 'En stock', photo: 'tomates' },
+    { name: 'Mozzarella di bufala', meta: '4 pièces · Frigo', tone: 'alert', badge: 'DLC J-1', photo: 'mozzarella' },
+    { name: 'Farine T65', meta: '2 sacs · Réserve', tone: 'warn', badge: 'Stock bas', photo: 'farine' },
+    { name: 'Basilic frais', meta: '3 bottes · Frigo', tone: 'warn', badge: 'DLC J-3', photo: 'basilic' },
   ] as const
 
   const tones = {
@@ -63,7 +96,8 @@ export function StockScreen() {
       <div className="grid grid-cols-2 gap-2">
         {items.map((item) => (
           <div key={item.name} className="bg-surface rounded-[13px] shadow-card overflow-hidden">
-            <div className="photo-ph relative h-16">
+            <div className="relative h-16">
+              <Vignette photo={item.photo} className="h-full w-full" />
               <span
                 className={`absolute top-1.5 right-1.5 rounded-full px-1.5 py-[3px] text-[7.5px] font-bold ${tones[item.tone]}`}
               >
@@ -91,7 +125,7 @@ export function AlertScreen() {
         <span className="text-[10.5px] font-bold">À cuisiner vite · 1</span>
       </div>
       <div className="bg-surface shadow-card border-alert flex items-center gap-2 rounded-[13px] border-l-[3px] p-2">
-        <span className="photo-ph h-8 w-8 flex-none rounded-[9px]" />
+        <Vignette photo="creme" className="h-8 w-8 flex-none rounded-[9px]" />
         <span className="flex min-w-0 flex-col">
           <span className="truncate text-[10px] font-bold">Crème liquide 35%</span>
           <span className="text-alert-ink text-[8.5px] font-semibold">
@@ -105,14 +139,14 @@ export function AlertScreen() {
         <span className="text-[10.5px] font-bold">DLC proche · 2</span>
       </div>
       {[
-        ['Mozzarella di bufala', 'Demain · 4 pièces'],
-        ['Basilic frais', 'Dans 3 jours · 3 bottes'],
-      ].map(([name, meta]) => (
+        ['Mozzarella di bufala', 'Demain · 4 pièces', 'mozzarella'],
+        ['Basilic frais', 'Dans 3 jours · 3 bottes', 'basilic'],
+      ].map(([name, meta, photo]) => (
         <div
           key={name}
           className="bg-surface shadow-card border-warn flex items-center gap-2 rounded-[13px] border-l-[3px] p-2"
         >
-          <span className="photo-ph h-8 w-8 flex-none rounded-[9px]" />
+          <Vignette photo={photo as string} className="h-8 w-8 flex-none rounded-[9px]" />
           <span className="flex min-w-0 flex-col">
             <span className="truncate text-[10px] font-bold">{name}</span>
             <span className="text-warn-ink text-[8.5px] font-semibold">{meta}</span>
@@ -153,10 +187,10 @@ export function OrderScreen() {
       </div>
 
       {[
-        ['Farine T65', 'Metro · sac 25 kg', '9', true],
-        ['Roquette', 'Primeur · sachet 500 g', '4', true],
-        ['Huile d’olive', 'Metro · bidon 5 L', '2', false],
-      ].map(([name, meta, qty, checked]) => (
+        ['Farine T65', 'Metro · sac 25 kg', '9', true, 'farine'],
+        ['Roquette', 'Primeur · sachet 500 g', '4', true, 'roquette'],
+        ['Huile d’olive', 'Metro · bidon 5 L', '2', false, 'huile'],
+      ].map(([name, meta, qty, checked, photo]) => (
         <div
           key={name as string}
           className={`bg-surface shadow-card flex items-center gap-2 rounded-[13px] p-2 ${checked ? '' : 'opacity-60'}`}
@@ -168,7 +202,7 @@ export function OrderScreen() {
           >
             {checked ? <CheckIcon size={9} strokeWidth={2.6} /> : null}
           </span>
-          <span className="photo-ph h-7 w-7 flex-none rounded-[8px]" />
+          <Vignette photo={photo as string} className="h-7 w-7 flex-none rounded-[8px]" />
           <span className="flex min-w-0 flex-1 flex-col">
             <span className="truncate text-[9.5px] font-bold">{name}</span>
             <span className="text-ink-muted text-[8px]">{meta}</span>

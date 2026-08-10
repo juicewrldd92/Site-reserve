@@ -5,8 +5,9 @@ import { BrandMark, CheckIcon, ChevronRightIcon } from '@/components/icons'
 import { cn } from '@/components/ui/cn'
 import { PRICE_LABEL, TRIAL_LABEL } from '@/lib/offer'
 
+import { InstallPrompt } from './landing/InstallPrompt'
+import { InstallSection } from './landing/InstallSection'
 import { PhoneFrame } from './landing/PhoneFrame'
-import { Plate } from './landing/Plate'
 import { Showcase } from './landing/Showcase'
 import { Simulator } from './landing/Simulator'
 import { AlertScreen, OrderScreen, ScanScreen, StockScreen } from './landing/screens'
@@ -26,10 +27,14 @@ export function Landing() {
   return (
     <div className="bg-canvas text-ink font-sans">
       <TopBar />
+      <InstallPrompt
+        onOpenGuide={() =>
+          document.getElementById('installer')?.scrollIntoView({ behavior: 'smooth' })
+        }
+      />
       <Hero />
       <Simulator />
       <Promises />
-      <Larder />
       <Showcase />
       <Proof />
       <Module
@@ -70,6 +75,7 @@ export function Landing() {
       />
       <Selling />
       <Pricing />
+      <InstallSection />
       <FinalCta />
       <Footer />
     </div>
@@ -100,6 +106,12 @@ function TopBar() {
           </a>
           <a href="#tarif" className="hidden text-[14px] font-semibold text-white/70 sm:block">
             Tarif
+          </a>
+          <a
+            href="#installer"
+            className="hidden text-[14px] font-semibold text-white/70 lg:block"
+          >
+            Installer
           </a>
           <Link to="/connexion" className="text-[14px] font-semibold text-white/70">
             Se connecter
@@ -204,58 +216,10 @@ function Promises() {
   )
 }
 
-function Larder() {
-  const plates = [
-    {
-      name: 'mozzarella' as const,
-      alt: 'Burrata sur un lit de tomates anciennes',
-      title: 'Le frais',
-      text: 'Celui qui se compte en jours, pas en semaines.',
-    },
-    {
-      name: 'basilic' as const,
-      alt: 'Feuilles de basilic frais',
-      title: 'Les herbes',
-      text: 'Achetées le lundi, oubliées le jeudi.',
-    },
-    {
-      name: 'farine' as const,
-      alt: 'Pâtes sèches sur une assiette blanche',
-      title: 'Le sec',
-      text: 'Qu’on croit inépuisable, jusqu’au samedi soir.',
-    },
-  ]
-
-  return (
-    <Section>
-      <div className="grid gap-5 sm:grid-cols-3">
-        {plates.map((plate) => (
-          <figure key={plate.name} className="flex flex-col gap-3">
-            <div className="rounded-sheet shadow-card h-[200px] overflow-hidden">
-              <Plate name={plate.name} alt={plate.alt} />
-            </div>
-            <figcaption className="flex flex-col gap-1 px-1">
-              <span className="text-[16px] font-bold tracking-[-0.01em]">{plate.title}</span>
-              <span className="text-ink-muted text-[14px] leading-snug">{plate.text}</span>
-            </figcaption>
-          </figure>
-        ))}
-      </div>
-    </Section>
-  )
-}
-
 function Proof() {
   return (
     <Section warm>
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-8 text-center">
-        <div className="rounded-sheet shadow-card-lg h-[220px] w-full overflow-hidden sm:h-[300px]">
-          <Plate
-            name="tomates"
-            alt="Rangs de tomates mûrissant au soleil"
-            className="scale-105"
-          />
-        </div>
         <h2 className="font-display text-[30px] leading-tight font-semibold tracking-[-0.015em] sm:text-[38px]">
           Un restaurant perd en moyenne
           <br />
@@ -385,11 +349,6 @@ function Pricing() {
           <br />
           de tomates oubliée
         </h2>
-
-        {/* La cagette du titre, en vrai. */}
-        <div className="rounded-sheet shadow-card h-[180px] w-full max-w-sm overflow-hidden">
-          <Plate name="legumes" alt="Cagette de courgettes portée au marché" />
-        </div>
 
         <div className="bg-surface rounded-sheet shadow-card w-full max-w-sm px-8 py-9">
           <div className="flex items-baseline justify-center gap-1.5">
