@@ -27,15 +27,13 @@ function Barcode() {
     <span
       // Légèrement de travers : une étiquette n'est jamais parfaitement
       // alignée avec l'objectif quand on scanne d'une main.
-      className="flex flex-col items-center gap-[3px] rounded-[3px] bg-white px-2 py-1.5 shadow-[0_3px_10px_rgb(0_0_0/0.45)]"
+      className="flex flex-col items-center gap-[2px] rounded-[2px] bg-white px-1.5 py-1 shadow-[0_2px_8px_rgb(0_0_0/0.5)]"
       style={{
-        // Sur une bouteille sombre, l'étiquette doit rester franche : un fondu
-        // `multiply` la grisait et les barres devenaient illisibles.
-        //
-        // Perspective volontairement faible : plus la surface est de face,
-        // plus les barres se lisent — c'est aussi ainsi qu'on tient son
-        // téléphone quand on scanne pour de vrai.
-        transform: 'rotate(-2.5deg) perspective(260px) rotateY(-5deg)',
+        // Une étiquette collée sur un flacon cylindrique s'incline avec lui et
+        // s'enroule légèrement : d'où la rotation prononcée et la perspective.
+        // Elle reste blanc franc — sur un fond sombre, un fondu grisait les
+        // barres au point de les rendre illisibles.
+        transform: 'rotate(-6deg) perspective(190px) rotateY(-13deg) scale(0.9)',
       }}
     >
       <span className="flex h-[30px] items-stretch gap-[1.5px]">
@@ -101,12 +99,18 @@ export function ScanScreen() {
         <span className="border-corail absolute bottom-0 left-0 h-8 w-8 rounded-bl-[13px] border-b-[3px] border-l-[3px]" />
         <span className="border-corail absolute right-0 bottom-0 h-8 w-8 rounded-br-[13px] border-b-[3px] border-r-[3px]" />
 
-        <span className="absolute inset-0 flex items-center justify-center">
-          <Barcode />
-        </span>
-
         <span className="absolute top-1/2 right-2 left-2 h-px bg-[linear-gradient(90deg,transparent,#FF5A3C,transparent)] shadow-[0_0_14px_rgb(255_90_60/0.9)]" />
       </div>
+
+      {/*
+        Le code-barres appartient à la bouteille, pas au cadre de visée : il est
+        donc posé sur elle, décentré et vers le bas comme sur un vrai flacon,
+        et non calé au milieu du réticule. C'est ce décalage qui fait la
+        différence entre une étiquette imprimée et un calque.
+      */}
+      <span className="absolute top-[35%] left-[27%] origin-left">
+        <Barcode />
+      </span>
 
       <div className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-3.5 px-6 pb-6">
         <p className="text-center text-[12px] leading-snug font-semibold text-white drop-shadow-[0_1px_6px_rgb(0_0_0/0.8)]">
