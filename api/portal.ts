@@ -1,6 +1,6 @@
-import { authenticate, getAdminClient, getStripe, isError, siteUrl } from './_stripe'
+import { authenticate, getAdminClient, getStripe, isError, siteUrl } from './_stripe.js'
 
-import { withErrors } from './_errors'
+import { withErrors } from './_errors.js'
 
 /**
  * Ouvre le portail de facturation Stripe.

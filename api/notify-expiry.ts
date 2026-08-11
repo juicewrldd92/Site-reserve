@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import webpush from 'web-push'
 
-import { withErrors } from './_errors'
+import { withErrors } from './_errors.js'
 
 /**
  * Rappel quotidien des dates limites.

@@ -1,0 +1,26 @@
+{
+  /*
+   * Les fonctions serveur, enfin typées.
+   *
+   * Elles ne l'étaient pas : `tsc -b` ne regardait que `src`, et une erreur
+   * dans `api/` ne se voyait qu'en production, sous forme d'un
+   * FUNCTION_INVOCATION_FAILED sans explication.
+   *
+   * `nodenext` reproduit la résolution réelle de Node en ESM — et exige donc
+   * l'extension sur les imports relatifs, ce qui aurait signalé le bug tout de
+   * suite.
+   */
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["ES2023", "DOM"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "types": ["node"],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "verbatimModuleSyntax": true
+  },
+  "include": ["api"]
+}

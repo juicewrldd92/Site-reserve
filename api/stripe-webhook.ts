@@ -1,8 +1,8 @@
 import type Stripe from 'stripe'
 
-import { getAdminClient, getStripe } from './_stripe'
+import { getAdminClient, getStripe } from './_stripe.js'
 
-import { withErrors } from './_errors'
+import { withErrors } from './_errors.js'
 
 /**
  * Réception des événements Stripe.
