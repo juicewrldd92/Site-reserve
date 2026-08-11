@@ -53,8 +53,11 @@ type NativeDetectorConstructor = (new (options: { formats: string[] }) => Native
 const MESSAGES: Record<ScannerErrorKind, string> = {
   'insecure-context':
     "La caméra n'est autorisée qu'en HTTPS. Ouvre l'app en https:// ou sur localhost.",
+  // Sur iPhone, Safari redemande l'autorisation à chaque session tant qu'elle
+  // n'est pas accordée en dur dans les réglages du système. On donne donc le
+  // chemin exact plutôt qu'un vague « autorise dans les réglages ».
   'permission-denied':
-    "Accès à la caméra refusé. Autorise-le dans les réglages du navigateur, puis réessaie.",
+    "Accès à la caméra refusé. Sur iPhone : Réglages → Safari → Caméra → Autoriser, puis rouvre Réserve. Sur Android : l'icône à gauche de l'adresse → Autorisations.",
   'no-camera': "Aucune caméra trouvée sur cet appareil.",
   unknown: "La caméra n'a pas voulu démarrer.",
 }

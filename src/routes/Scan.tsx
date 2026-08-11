@@ -170,7 +170,7 @@ export function Scan() {
         style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 32px)' }}
       >
         {current && current.locations.length > 0 && (
-          <div className="no-scrollbar flex gap-2.5 overflow-x-auto">
+          <div className="no-scrollbar flex gap-2.5 overflow-x-auto overscroll-x-contain">
             {current.locations.map((option) => (
               <button
                 key={option}

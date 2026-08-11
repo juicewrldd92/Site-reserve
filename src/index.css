@@ -181,3 +181,29 @@
     }
   }
 }
+
+/*
+ * Comportement de défilement d'application, pas de page web.
+ *
+ * `overflow-x: hidden` empêche qu'un élément trop large décale tout l'écran.
+ * `overscroll-behavior-x: none` supprime le rebond horizontal et le geste de
+ * retour arrière du navigateur : sur iPhone, un glissement de côté un peu large
+ * faisait quitter l'écran en cours, ce qui n'arrive dans aucune vraie app.
+ *
+ * Les rangées de filtres, elles, gardent leur défilement propre : `contain`
+ * s'applique à leur conteneur, pas au document.
+ */
+html,
+body {
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+}
+
+/*
+ * Les noms de produits arrivent parfois d'Open Food Facts en un seul bloc
+ * (« MOZZARELLADIBUFALACAMPANA500G »). Sans césure, ils poussent leur carte
+ * hors du cadre. On coupe donc là où il faut plutôt que de déborder.
+ */
+body {
+  overflow-wrap: anywhere;
+}

@@ -13,6 +13,7 @@ import { toast } from '@/components/ui/toast'
 import { productsQueryKey } from '@/features/products/productKeys'
 import { replaceProductImage } from '@/features/products/productRepository'
 import { UnitSelect } from '@/features/products/UnitSelect'
+import { displayImage } from '@/features/products/productImages'
 import { unitLabel } from '@/features/products/units'
 import { useTenancy } from '@/features/tenancy/useTenancy'
 import type { StockOverviewRow } from '@/lib/database.types'
@@ -145,9 +146,9 @@ export function StockDetailSheet({
             aria-label="Changer la photo du produit"
             className="photo-ph relative h-20 w-20 flex-none overflow-hidden rounded-[20px]"
           >
-            {(photoPreview ?? item.image_url) && (
+            {(photoPreview ?? displayImage(item.image_url, item.name)) && (
               <img
-                src={photoPreview ?? item.image_url ?? ''}
+                src={photoPreview ?? displayImage(item.image_url, item.name) ?? ''}
                 alt=""
                 className="h-full w-full object-cover"
               />

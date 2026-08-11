@@ -7,51 +7,6 @@ import { CalendarIcon, CheckIcon, MinusIcon, PlusIcon, ScanIcon } from '@/compon
  * vus : un aplat rayé ne donne pas envie, et c'est précisément la grille de
  * photos qui fait l'écran signature de l'app.
  */
-/**
- * Code-barres dessiné, posé sur le produit visé.
- *
- * Motif fixe et non aléatoire : un `Math.random()` ferait danser les barres à
- * chaque rendu de la démonstration, et rien n'a l'air plus faux qu'un
- * code-barres qui change tout seul.
- *
- * Ce n'est pas un EAN valide et ça n'a pas à l'être — c'est une illustration,
- * pas une étiquette à scanner.
- */
-const BARRES = [
-  2, 1, 1, 3, 1, 2, 1, 1, 2, 3, 1, 1, 2, 1, 3, 2, 1, 1, 3, 1,
-  2, 2, 1, 3, 1, 1, 2, 1, 1, 3, 2, 1, 1, 2, 3, 1, 2, 1, 1, 2,
-]
-
-function Barcode() {
-  return (
-    <span
-      // Légèrement de travers : une étiquette n'est jamais parfaitement
-      // alignée avec l'objectif quand on scanne d'une main.
-      className="flex flex-col items-center gap-[2px] rounded-[2px] bg-white px-1.5 py-1 shadow-[0_2px_8px_rgb(0_0_0/0.5)]"
-      style={{
-        // Une étiquette collée sur un flacon cylindrique s'incline avec lui et
-        // s'enroule légèrement : d'où la rotation prononcée et la perspective.
-        // Elle reste blanc franc — sur un fond sombre, un fondu grisait les
-        // barres au point de les rendre illisibles.
-        transform: 'rotate(-6deg) perspective(190px) rotateY(-13deg) scale(0.9)',
-      }}
-    >
-      <span className="flex h-[30px] items-stretch gap-[1.5px]">
-        {BARRES.map((largeur, index) => (
-          <span
-            key={index}
-            className="bg-night"
-            style={{ width: `${largeur}px` }}
-          />
-        ))}
-      </span>
-      <span className="text-night text-[6px] leading-none font-bold tracking-[0.18em]">
-        3 256540 000178
-      </span>
-    </span>
-  )
-}
-
 function Vignette({ photo, className }: { photo: string; className?: string }) {
   return (
     <img
@@ -80,20 +35,20 @@ export function ScanScreen() {
       <img
         src="/photos/scan.jpg"
         alt=""
-        width={505}
-        height={880}
+        width={355}
+        height={900}
         loading="lazy"
         decoding="async"
         className="absolute inset-0 h-full w-full object-cover"
       />
       {/* L'aperçu caméra d'un téléphone n'est jamais en pleine lumière, et le
           réticule doit rester lisible par-dessus. */}
-      <div className="absolute inset-0 bg-[radial-gradient(115%_65%_at_50%_31%,rgb(0_0_0/0.04),rgb(0_0_0/0.58)_80%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(115%_65%_at_62%_34%,rgb(0_0_0/0.04),rgb(0_0_0/0.58)_80%)]" />
 
       {/* Réticule et code-barres au même endroit : sur le corps de la boîte,
           là où l'étiquette se trouve réellement. Un code-barres flottant au
           centre de l'écran se voit tout de suite comme un collage. */}
-      <div className="absolute top-[31%] left-1/2 h-[158px] w-[158px] -translate-x-1/2 -translate-y-1/2">
+      <div className="absolute top-[34%] left-[62%] h-[126px] w-[126px] -translate-x-1/2 -translate-y-1/2">
         <span className="border-corail absolute top-0 left-0 h-8 w-8 rounded-tl-[13px] border-t-[3px] border-l-[3px]" />
         <span className="border-corail absolute top-0 right-0 h-8 w-8 rounded-tr-[13px] border-t-[3px] border-r-[3px]" />
         <span className="border-corail absolute bottom-0 left-0 h-8 w-8 rounded-bl-[13px] border-b-[3px] border-l-[3px]" />
@@ -101,16 +56,6 @@ export function ScanScreen() {
 
         <span className="absolute top-1/2 right-2 left-2 h-px bg-[linear-gradient(90deg,transparent,#FF5A3C,transparent)] shadow-[0_0_14px_rgb(255_90_60/0.9)]" />
       </div>
-
-      {/*
-        Le code-barres appartient à la bouteille, pas au cadre de visée : il est
-        donc posé sur elle, décentré et vers le bas comme sur un vrai flacon,
-        et non calé au milieu du réticule. C'est ce décalage qui fait la
-        différence entre une étiquette imprimée et un calque.
-      */}
-      <span className="absolute top-[35%] left-[27%] origin-left">
-        <Barcode />
-      </span>
 
       <div className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-3.5 px-6 pb-6">
         <p className="text-center text-[12px] leading-snug font-semibold text-white drop-shadow-[0_1px_6px_rgb(0_0_0/0.8)]">

@@ -210,7 +210,7 @@ export function Stock() {
         />
       </label>
 
-      <div className="no-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5">
+      <div className="no-scrollbar -mx-5 flex gap-2 overflow-x-auto overscroll-x-contain px-5">
         <FilterChip
           active={activeFilters === 0}
           onClick={() => {

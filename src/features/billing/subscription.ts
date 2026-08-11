@@ -33,7 +33,28 @@ async function openBillingRoute(route: 'checkout' | 'portal', orgId: string): Pr
     body: JSON.stringify({ orgId }),
   })
 
-  const payload = (await response.json()) as { url?: string; erreur?: string }
+  /*
+   * Le serveur ne renvoie pas toujours du JSON.
+   *
+   * Quand une fonction Vercel plante avant d'atteindre notre code, elle rend
+   * une page d'erreur HTML. `response.json()` lève alors une exception dont le
+   * message, sur Safari, est « The string did not match the expected
+   * pattern » — incompréhensible pour un restaurateur, et trompeur pour nous
+   * puisqu'il ne dit rien du vrai problème.
+   *
+   * On lit donc le texte brut, on tente de le comprendre, et on parle clair.
+   */
+  const brut = await response.text()
+  let payload: { url?: string; erreur?: string } = {}
+  try {
+    payload = JSON.parse(brut) as { url?: string; erreur?: string }
+  } catch {
+    console.error('Réponse inattendue de /api/' + route, response.status, brut.slice(0, 300))
+    throw new Error(
+      `Le service de paiement n'a pas répondu correctement (erreur ${response.status}). Réessaie dans un instant.`,
+    )
+  }
+
   if (!response.ok || !payload.url) {
     throw new Error(payload.erreur ?? 'Paiement indisponible pour le moment.')
   }
