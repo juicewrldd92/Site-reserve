@@ -10,17 +10,31 @@ import Stripe from 'stripe'
  */
 
 export function getStripe(): Stripe {
-  const key = process.env.STRIPE_SECRET_KEY
-  if (!key) throw new Error('STRIPE_SECRET_KEY manquante')
-  return new Stripe(key)
+  return new Stripe(exiger('STRIPE_SECRET_KEY'))
+}
+
+/**
+ * Lit une variable d'environnement, ou dit laquelle manque.
+ *
+ * Un message générique oblige à essayer les variables une par une, avec un
+ * redéploiement entre chaque. Nommer la coupable transforme une demi-heure de
+ * tâtonnement en une minute.
+ */
+function exiger(nom: string): string {
+  const valeur = process.env[nom]
+  if (!valeur) {
+    throw new Error(`Variable ${nom} absente des réglages Vercel du projet.`)
+  }
+  return valeur
 }
 
 /** Client à pleins pouvoirs : contourne la RLS, ne sort jamais du serveur. */
 export function getAdminClient() {
-  const url = process.env.VITE_SUPABASE_URL
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!url || !key) throw new Error('Configuration Supabase manquante')
-  return createClient(url, key, { auth: { persistSession: false } })
+  return createClient(
+    exiger('VITE_SUPABASE_URL'),
+    exiger('SUPABASE_SERVICE_ROLE_KEY'),
+    { auth: { persistSession: false } },
+  )
 }
 
 export function siteUrl(request: Request): string {
