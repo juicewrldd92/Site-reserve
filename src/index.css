@@ -183,27 +183,19 @@
 }
 
 /*
- * Comportement de défilement d'application, pas de page web.
+ * Défilement : on ne touche pas au conteneur du document.
  *
- * `overflow-x: clip` empêche qu'un élément trop large décale tout l'écran.
- * `overscroll-behavior-x: none` supprime le rebond horizontal et le geste de
- * retour arrière du navigateur : sur iPhone, un glissement de côté un peu large
- * faisait quitter l'écran en cours, ce qui n'arrive dans aucune vraie app.
+ * `overflow-x: hidden` sur `html` en fait un conteneur de défilement et
+ * détache `position: sticky` du viewport ; `clip` casse carrément le calcul de
+ * hauteur — mesuré, `html` tombait à 0 px pendant que `body` en affichait
+ * 66 000. Les deux cassaient la page pour régler un symptôme.
  *
- * Les rangées de filtres, elles, gardent leur défilement propre : `contain`
- * s'applique à leur conteneur, pas au document.
+ * Le débordement horizontal se traite là où il naît : `overflow-x-hidden` sur
+ * le `main` de l'app, sections contenues sur la vitrine. Ne reste ici que le
+ * rebond horizontal, qui est un comportement et non une mise en page.
  */
 html,
 body {
-  /*
-   * `clip` et non `hidden` : `overflow-x: hidden` fait du document un
-   * conteneur de défilement, ce qui détache `position: sticky` du viewport —
-   * la barre de navigation partait vers le haut au lieu de rester collée.
-   *
-   * `clip` coupe le débordement sans créer ce conteneur. C'est exactement ce
-   * qu'on veut : bloquer le décalage horizontal, ne toucher à rien d'autre.
-   */
-  overflow-x: clip;
   overscroll-behavior-x: none;
 }
 
