@@ -185,7 +185,7 @@
 /*
  * Comportement de défilement d'application, pas de page web.
  *
- * `overflow-x: hidden` empêche qu'un élément trop large décale tout l'écran.
+ * `overflow-x: clip` empêche qu'un élément trop large décale tout l'écran.
  * `overscroll-behavior-x: none` supprime le rebond horizontal et le geste de
  * retour arrière du navigateur : sur iPhone, un glissement de côté un peu large
  * faisait quitter l'écran en cours, ce qui n'arrive dans aucune vraie app.
@@ -195,7 +195,15 @@
  */
 html,
 body {
-  overflow-x: hidden;
+  /*
+   * `clip` et non `hidden` : `overflow-x: hidden` fait du document un
+   * conteneur de défilement, ce qui détache `position: sticky` du viewport —
+   * la barre de navigation partait vers le haut au lieu de rester collée.
+   *
+   * `clip` coupe le débordement sans créer ce conteneur. C'est exactement ce
+   * qu'on veut : bloquer le décalage horizontal, ne toucher à rien d'autre.
+   */
+  overflow-x: clip;
   overscroll-behavior-x: none;
 }
 
